@@ -35,4 +35,6 @@ object JsonImplicits extends DefaultJsonProtocol with SprayJsonSupport{
 
   implicit val pageDTOFormat = jsonFormat3(PageDTO)
 
+  implicit val pagePostsDTOFormat = jsonFormat4(PostDTO)
+
 }

@@ -1,7 +1,7 @@
 import Data.FirstClassData
-import Nodes.{Page, Profile, User}
+import Nodes.{Post, Page, Profile, User}
 import akka.actor.{Actor, ActorSystem}
-import common.{PageDTO, FriendDTO, UserDTO}
+import common.{PostDTO, PageDTO, FriendDTO, UserDTO}
 
 /**
   * Created by sunito on 11/28/15.
@@ -26,6 +26,10 @@ case class deletePage(pageId : Int)
 case class getPageProfile(pageId : Int)
 case class savePageProfile(profile : Profile)
 case class deletePageProfile(pageId : Int)
+
+case class getPagePosts(pageId : Int)
+case class savePagePosts(pageId : Int, posts : List[PostDTO])
+case class deletePagePosts(pageId : Int)
 
 class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
 
@@ -67,6 +71,7 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
     case saveUserProfile(Profile(id, userOrPageId, userOrPage, description, email, pic))
           => val userId = userOrPageId
              val user : User = userMap.get(userId)
+             println(userMap)
              val m_user = user.copy(u_profile_id = Some(id))
              userMap.put(userId, m_user)
              profileMap.put(id, new Profile(id, userOrPageId, userOrPage, description, email, pic))
@@ -165,6 +170,37 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
              val m_page = page.copy(page_profile = Some(profile.id))
              pageMap.put(pageId, m_page)
              sender ! "saved page profile: " + profile.id + " on page: " + pageId
+
+    /**
+      * CRUD of page posts
+      */
+
+    case getPagePosts(pageId : Int)
+          =>  val postIdList : List[Int] = pageMap.get(pageId).posts.getOrElse(List())
+              var posts : List[PostDTO] = List()
+              for (postId <- postIdList) {
+                val post : PostDTO = postMap.get(postId).getDTO()
+                posts = posts :+ post
+              }
+              sender ! posts
+
+
+    case savePagePosts(pageId : Int, posts : List[PostDTO])
+          =>  val page : Page = pageMap.get(pageId)
+              var postIdList : List[Int] = List()
+              for (post <- posts) {
+                postMap.put(post.id, new Post(post.id, pageId, post.postOnPage, post.post_msg, None, None))
+                postIdList = postIdList :+ post.id
+              }
+              var curr_posts : List[Int] = page.posts.getOrElse(List())
+              /*if (curr_posts == null) {
+                curr_posts = postIdList
+              } else {
+                curr_posts = curr_posts ::: postIdList
+              }*/
+              curr_posts = curr_posts ::: postIdList
+              pageMap.put(pageId, page.copy(posts = Some(curr_posts)))
+              sender ! "saved posts list for page: " + pageId
 
     case default => println("Default message")
   }

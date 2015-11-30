@@ -6,7 +6,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import common.JsonImplicits._
-import common.{PageDTO, FriendDTO, UserProfileDTO, UserDTO}
+import common._
 import spray.http.MediaTypes
 import spray.routing._
 import spray.http.MediaTypes
@@ -44,7 +44,8 @@ object MasterServer extends SimpleRoutingApp {
           userProfileRouter~
           friendRouter~
           pageRouter~
-          pageProfileRouter
+          pageProfileRouter~
+          pagePostRouter
 
         }
 
@@ -250,6 +251,48 @@ object MasterServer extends SimpleRoutingApp {
                 }
               }
           }
+
+        lazy val pagePostRouter = {
+          get {
+            path("page" / "posts" / IntNumber) {
+              pageId => {
+                respondWithMediaType(MediaTypes.`application/json`) {
+                  complete {
+                    val posts : List[PostDTO] = Await.result(workerList(0) ? getPagePosts(pageId), timeout.duration).asInstanceOf[List[PostDTO]]
+                    val postsJson = posts.toJson
+                    postsJson.toString()
+                  }
+                }
+              }
+            }
+          } ~
+            post {
+              path("page" / "posts" / "save" / IntNumber) {
+                pageId => {
+                  entity(as[List[PostDTO]]) {
+                    posts => {
+
+                      val status = Await.result(workerList(0) ? savePagePosts(pageId, posts), timeout.duration).asInstanceOf[String]
+                      complete {
+                        status.toString
+                      }
+
+                    }
+                  }
+                }
+              }
+            } ~
+            delete {
+              path("page" / "posts" / IntNumber) {
+                pageId => {
+                  complete {
+                    val status = Await.result(workerList(0) ? deletePagePosts(pageId), timeout.duration).asInstanceOf[String]
+                    status.toString
+                  }
+                }
+              }
+            }
+        }
 
       }
 }

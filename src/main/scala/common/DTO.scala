@@ -24,3 +24,8 @@ case class FriendDTO ( id : Int,
 case class PageDTO ( id : Int,
                      owner_user_id : Int,
                      page_name : String)
+
+case class PostDTO ( id : Int,
+                     authorId : Int,
+                     postOnPage : Boolean,
+                     post_msg : String)
