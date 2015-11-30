@@ -30,3 +30,17 @@ case class PostDTO ( id : Int,
                      authorId : Int,
                      postOnPage : Boolean,
                      post_msg : String)
+
+case class AlbumDTO ( id : Int,
+                      profile_id : Int,
+                      name : String,
+                      description : String)
+
+case class PicDTO ( id : Int,
+                    album_id : Int,
+                    description : String,
+                    data : String)
+
+case class ActivityDTO( id : Int,
+                        owner_id : Int,
+                        owner_type : String)

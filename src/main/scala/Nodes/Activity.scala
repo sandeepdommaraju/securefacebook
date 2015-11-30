@@ -1,5 +1,7 @@
 package Nodes
 
+import common.ActivityDTO
+
 /**
   * Created by sunito on 11/30/15.
   */
@@ -9,4 +11,10 @@ case class Activity ( id : Int,
                       comments : Option[Int],
                       likes : Option[Int],
                       shares : Option[Int])
-    extends basic
+    extends basic {
+
+  def getDTO() = {
+    ActivityDTO(this.id, this.owner_id, this.owner_type)
+  }
+
+}

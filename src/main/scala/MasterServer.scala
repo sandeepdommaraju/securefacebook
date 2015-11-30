@@ -46,8 +46,9 @@ object MasterServer extends SimpleRoutingApp {
           pageRouter~
           pageProfileRouter~
           pagePostRouter~
-          userPostRouter
-          //albumRouter
+          userPostRouter~
+          albumRouter~
+          userAlbumPicRouter
 
         }
 
@@ -338,9 +339,92 @@ object MasterServer extends SimpleRoutingApp {
             }
         }
 
-        /*lazy val albumRouter =
+        lazy val albumRouter = {
 
-        }*/
+          get {
+            path("users" / "profile" / "album" / IntNumber / IntNumber) {
+              (userId, profileId) => {
+                respondWithMediaType(MediaTypes.`application/json`) {
+                  complete {
+                    val album : AlbumDTO = Await.result(workerList(0) ? getUserProfileAlbum(userId, profileId), timeout.duration).asInstanceOf[AlbumDTO]
+                    val albumJson = album.toJson
+                    albumJson.toString()
+                  }
+                }
+              }
+            }
+          } ~
+            post {
+              path("users" / "profile" / "album" / "save" / IntNumber / IntNumber) {
+                (userId, profileId) => {
+                  entity(as[AlbumDTO]) {
+                    albumDTO => {
+
+                      val status = Await.result(workerList(0) ? saveUserProfileAlbum(userId, profileId, albumDTO), timeout.duration).asInstanceOf[String]
+                      complete {
+                        status.toString
+                      }
+
+                    }
+                  }
+                }
+              }
+            } ~
+            delete {
+              path("users" / "profile" / "album" / IntNumber / IntNumber) {
+                (userId, profileId) => {
+                  complete {
+                    val status = Await.result(workerList(0) ? deleteUserProfileAlbum(userId, profileId), timeout.duration).asInstanceOf[String]
+                    status.toString
+                  }
+                }
+              }
+            }
+
+        }
+
+        lazy val userAlbumPicRouter = {
+
+          get {
+            path("users" / "profile" / "album" / "pics" / IntNumber / IntNumber) {
+              (userId, profileId) => {
+                respondWithMediaType(MediaTypes.`application/json`) {
+                  complete {
+                    val pics : List[PicDTO] = Await.result(workerList(0) ? getUserProfileAlbumPics(userId, profileId), timeout.duration).asInstanceOf[List[PicDTO]]
+                    val picsJson = pics.toJson
+                    picsJson.toString()
+                  }
+                }
+              }
+            }
+          } ~
+            post {
+              path("users" / "profile" / "album" / "pics" / "save" / IntNumber / IntNumber) {
+                (userId, profileId) => {
+                  entity(as[List[PicDTO]]) {
+                    pics => {
+
+                      val status = Await.result(workerList(0) ? saveUserProfileAlbumPics(userId, profileId, pics), timeout.duration).asInstanceOf[String]
+                      complete {
+                        status.toString
+                      }
+
+                    }
+                  }
+                }
+              }
+            } ~
+            delete {
+              path("users" / "profile" / "album" / "pics" / IntNumber / IntNumber / IntNumber) {
+                (userId, profileId, picId) => {
+                  complete {
+                    val status = Await.result(workerList(0) ? deleteUserProfileAlbumPic(userId, profileId, picId), timeout.duration).asInstanceOf[String]
+                    status.toString
+                  }
+                }
+              }
+            }
+        }
 
       }
 }

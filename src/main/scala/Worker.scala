@@ -1,5 +1,5 @@
 import Data.FirstClassData
-import Nodes.{Post, Page, Profile, User}
+import Nodes._
 import akka.actor.{Actor, ActorSystem}
 import common._
 
@@ -35,6 +35,16 @@ case class deletePagePosts(pageId : Int)
 case class getUserPosts(userId : Int)
 case class saveUserPosts(userId : Int, posts : List[PostDTO])
 case class deleteUserPosts(userId : Int) // on his wall
+
+
+case class getUserProfileAlbum(userId : Int, profileId : Int)
+case class saveUserProfileAlbum(userId : Int, profileId : Int, albumDTO: AlbumDTO)
+case class deleteUserProfileAlbum(userId : Int, profileId : Int)
+
+
+case class getUserProfileAlbumPics(userId : Int, profileId : Int)
+case class saveUserProfileAlbumPics(userId : Int, profileId : Int, pics : List[PicDTO])
+case class deleteUserProfileAlbumPic(userId : Int, profileId : Int, picId : Int)
 
 class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
 
@@ -235,6 +245,51 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
 
     case deleteUserPosts(userId : Int) // on his wall
           =>  "TODO"
+
+    /**
+      * CRUD of user profile Album
+      */
+
+    case getUserProfileAlbum(userId : Int, profileId : Int)
+          =>  val albumId : Int = profileMap.get(profileId).album.getOrElse(0)
+              val albumDTO : AlbumDTO = albumMap.get(albumId).getDTO()
+              sender ! albumDTO
+
+    case saveUserProfileAlbum(userId : Int, profileId : Int, albumDTO: AlbumDTO)
+          =>  albumMap.put(albumDTO.id, new Album(albumDTO.id, albumDTO.profile_id, albumDTO.name, albumDTO.description, None, None))
+              val curr_profile : Profile = profileMap.get(profileId)
+              profileMap.put(profileId, curr_profile.copy(album = Some(albumDTO.id)))
+              sender ! "saved user profile Album: " + albumDTO.id + " for user: " + userId + " in profile: " + profileId
+
+    case deleteUserProfileAlbum(userId : Int, profileId : Int)
+          => "TODO"
+
+
+     case getUserProfileAlbumPics(userId : Int, profileId : Int)
+          => val albumId : Int = profileMap.get(profileId).album.getOrElse(0)
+             val pics_ids : List[Int] = albumMap.get(albumId).pics.getOrElse(List())
+             var pics : List[PicDTO] = List()
+             for (pic_id <- pics_ids) {
+               pics = pics :+ picMap.get(pic_id).getDTO()
+             }
+             sender ! pics
+
+     case saveUserProfileAlbumPics(userId : Int, profileId : Int, pics : List[PicDTO])
+          => val albumId : Int = profileMap.get(profileId).album.getOrElse(0)
+             val album : Album = albumMap.get(albumId)
+             var curr_pics : List[Int] = album.pics.getOrElse(List())
+             var t_pic_ids : List[Int] = List()
+             for (pic <- pics) {
+               t_pic_ids = t_pic_ids :+ pic.id
+               picMap.put(pic.id, new Pic(pic.id, pic.album_id, pic.description, pic.data, None))
+             }
+             curr_pics = curr_pics ::: t_pic_ids
+             albumMap.put(albumId, album.copy(pics = Some(curr_pics)))
+             sender ! "saved user profile Album Pics: in album" + albumId + " for user: " + userId + " in profile: " + profileId
+
+     case deleteUserProfileAlbumPic(userId : Int, profileId : Int, picId : Int)
+          => "TODO"
+
 
     case default => println("Default message")
   }
