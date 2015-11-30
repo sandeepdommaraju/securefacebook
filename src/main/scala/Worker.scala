@@ -31,6 +31,11 @@ case class getPagePosts(pageId : Int)
 case class savePagePosts(pageId : Int, posts : List[PostDTO])
 case class deletePagePosts(pageId : Int)
 
+// Posts on user's wall - only he can post on his wall
+case class getUserPosts(userId : Int)
+case class saveUserPosts(userId : Int, posts : List[PostDTO])
+case class deleteUserPosts(userId : Int) // on his wall
+
 class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
 
   def receive = {
@@ -201,6 +206,35 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
               curr_posts = curr_posts ::: postIdList
               pageMap.put(pageId, page.copy(posts = Some(curr_posts)))
               sender ! "saved posts list for page: " + pageId
+
+
+    /**
+      *CRUD of user Posts on his wall
+      */
+
+    case getUserPosts(userId : Int)
+          =>  val postIdList : List[Int] = userMap.get(userId).u_wall.getOrElse(List())
+              var posts : List[PostDTO] = List()
+              for (postId <- postIdList) {
+                val post : PostDTO = postMap.get(postId).getDTO()
+                posts = posts :+ post
+              }
+              sender ! posts
+
+    case saveUserPosts(userId : Int, posts : List[PostDTO])
+          =>  val user : User = userMap.get(userId)
+              var postIdList : List[Int] = List()
+              for (post <- posts) {
+                postMap.put(post.id, new Post(post.id, userId, post.postOnPage, post.post_msg, None, None))
+                postIdList = postIdList :+ post.id
+              }
+              var curr_posts : List[Int] = user.u_wall.getOrElse(List())
+              curr_posts = curr_posts ::: postIdList
+              userMap.put(userId, user.copy(u_wall = Some(curr_posts)))
+              sender ! "saved posts list for user: " + userId
+
+    case deleteUserPosts(userId : Int) // on his wall
+          =>  "TODO"
 
     case default => println("Default message")
   }

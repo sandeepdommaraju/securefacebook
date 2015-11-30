@@ -45,7 +45,8 @@ object MasterServer extends SimpleRoutingApp {
           friendRouter~
           pageRouter~
           pageProfileRouter~
-          pagePostRouter
+          pagePostRouter~
+          userPostRouter
 
         }
 
@@ -287,6 +288,48 @@ object MasterServer extends SimpleRoutingApp {
                 pageId => {
                   complete {
                     val status = Await.result(workerList(0) ? deletePagePosts(pageId), timeout.duration).asInstanceOf[String]
+                    status.toString
+                  }
+                }
+              }
+            }
+        }
+
+        lazy val userPostRouter = {
+          get {
+            path("user" / "posts" / IntNumber) {
+              userId => {
+                respondWithMediaType(MediaTypes.`application/json`) {
+                  complete {
+                    val posts : List[PostDTO] = Await.result(workerList(0) ? getUserPosts(userId), timeout.duration).asInstanceOf[List[PostDTO]]
+                    val postsJson = posts.toJson
+                    postsJson.toString()
+                  }
+                }
+              }
+            }
+          } ~
+            post {
+              path("user" / "posts" / "save" / IntNumber) {
+                userId => {
+                  entity(as[List[PostDTO]]) {
+                    posts => {
+
+                      val status = Await.result(workerList(0) ? saveUserPosts(userId, posts), timeout.duration).asInstanceOf[String]
+                      complete {
+                        status.toString
+                      }
+
+                    }
+                  }
+                }
+              }
+            } ~
+            delete {
+              path("user" / "posts" / IntNumber) {
+                userId => {
+                  complete {
+                    val status = Await.result(workerList(0) ? deleteUserPosts(userId), timeout.duration).asInstanceOf[String]
                     status.toString
                   }
                 }

@@ -1,6 +1,6 @@
 package Nodes
 
-import common.FriendDTO
+import common.{UserDTO, FriendDTO}
 
 /**
   * Created by sunito on 11/26/15.
@@ -18,4 +18,12 @@ case class User ( id : Int,
                   u_friend_requests : Option[List[Int]], //List of pending FriendRequests
                   u_wall : Option[List[Int]],            //List of posts on user wall -- timeline
                   u_newsFeed : Option[List[Int]])        //List of posts of my friends on their walls
-              extends basic
+              extends basic {
+
+  def getDTO() = {
+    UserDTO(this.id, this.handle, this.first_name, this.last_name, this.sex, this.birthday)
+  }
+
+
+}
+
