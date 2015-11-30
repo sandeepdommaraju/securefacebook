@@ -1,3 +1,5 @@
+import java.util.concurrent.atomic.AtomicInteger
+
 import Data.FirstClassData
 import Nodes._
 import akka.actor.{Actor, ActorSystem}
@@ -46,7 +48,19 @@ case class getUserProfileAlbumPics(userId : Int, profileId : Int)
 case class saveUserProfileAlbumPics(userId : Int, profileId : Int, pics : List[PicDTO])
 case class deleteUserProfileAlbumPic(userId : Int, profileId : Int, picId : Int)
 
+case class getCommentsOnUserWallPost(userId : Int, postId : Int)
+case class saveCommentsOnUserWallPost(userId : Int, postId : Int, comments : List[Comment])
+case class deleteCommentOnUserWallPost(userId : Int, postId : Int, commentId : Int)
+
 class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
+
+  val activity_base_num = 500000
+  val activity_atomic_gen = new AtomicInteger(activity_base_num)
+
+  def getNextActivityId() : Int= {
+      println("Getting next ActivityId Int!!!")
+      activity_atomic_gen.addAndGet(1)
+  }
 
   def receive = {
 
@@ -264,8 +278,11 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
     case deleteUserProfileAlbum(userId : Int, profileId : Int)
           => "TODO"
 
+    /**
+      * CRUD of user profile Album Pics
+      */
 
-     case getUserProfileAlbumPics(userId : Int, profileId : Int)
+    case getUserProfileAlbumPics(userId : Int, profileId : Int)
           => val albumId : Int = profileMap.get(profileId).album.getOrElse(0)
              val pics_ids : List[Int] = albumMap.get(albumId).pics.getOrElse(List())
              var pics : List[PicDTO] = List()
@@ -291,6 +308,45 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
           => "TODO"
 
 
-    case default => println("Default message")
+    /**
+      * CRUD of Comments on a Post on user wall
+      */
+
+    case getCommentsOnUserWallPost(userId : Int, postId : Int)
+          => val post : Post = postMap.get(postId)
+             val activityId : Int = post.activity.getOrElse(0)
+             val activity : Activity = activityMap.get(activityId)
+             val comment_ids : List[Int] = activity.comments.getOrElse(List())
+             var comments : List[Comment] = List()
+             for (comment_id <- comment_ids) {
+               comments = comments :+ commentMap.get(comment_id)
+             }
+             sender ! comments
+
+    case saveCommentsOnUserWallPost(userId : Int, postId : Int, comments : List[Comment])
+          => val post : Post = postMap.get(postId)
+             val activityId : Int = post.activity.getOrElse(getNextActivityId())
+             //println(postMap)
+             //println(activityId)
+             postMap.put(post.id, post.copy(activity = Some(activityId)))
+             val activity : Activity = activityMap.get(activityId)
+             var curr_activity : Activity = activity
+             if (activity == null) {
+               curr_activity = new Activity(activityId, userId, "user", None, None, None)
+             }
+             var curr_comment_ids : List[Int] = curr_activity.comments.getOrElse(List())
+             for (comment <- comments) {
+               curr_comment_ids = curr_comment_ids :+ comment.id
+               commentMap.put(comment.id, comment.copy(activity_id = activityId))
+             }
+             activityMap.put(activityId, curr_activity.copy(comments = Some(curr_comment_ids)))
+             sender ! "saved comments on user wall on post: " + postId + " for user: " + userId
+
+
+    case deleteCommentOnUserWallPost(userId : Int, postId : Int, commentId : Int)
+          => ""
+
+
+    case _ => println("Default message")
   }
 }

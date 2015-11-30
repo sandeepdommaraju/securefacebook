@@ -27,4 +27,6 @@ trait FirstClassData {
   val likeMap : ConcurrentHashMap[Int, Like] = new ConcurrentHashMap()
 
   val shareMap : ConcurrentHashMap[Int, Share] = new ConcurrentHashMap()
+
+  val activityMap : ConcurrentHashMap[Int, Activity] = new ConcurrentHashMap()
 }

@@ -8,9 +8,9 @@ import common.ActivityDTO
 case class Activity ( id : Int,
                       owner_id : Int,     // Post, Album, Picture
                       owner_type : String,
-                      comments : Option[Int],
-                      likes : Option[Int],
-                      shares : Option[Int])
+                      comments : Option[List[Int]],
+                      likes : Option[List[Int]],
+                      shares : Option[List[Int]])
     extends basic {
 
   def getDTO() = {

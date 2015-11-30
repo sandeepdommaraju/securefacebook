@@ -12,7 +12,7 @@ case class Post (id : Int,
                  post_msg : String,    // postOrPic
                  //comments : Option[List[Int]], // List of commentIds
                  //likes : Option[List[Int]]     // List of userIds who liked
-                 activity : Option[Int]
+                 var activity : Option[Int]
                  )
            extends basic {
 
@@ -20,6 +20,11 @@ case class Post (id : Int,
 
   def getDTO() = {
     PostDTO(this.id, this.authorId, this.postOnPage, this.post_msg)
+  }
+
+  def createActivity = {
+    this.activity = Some(50000)
+
   }
 
 }

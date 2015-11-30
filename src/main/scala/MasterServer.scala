@@ -48,7 +48,8 @@ object MasterServer extends SimpleRoutingApp {
           pagePostRouter~
           userPostRouter~
           albumRouter~
-          userAlbumPicRouter
+          userAlbumPicRouter~
+          userPostCommentRouter
 
         }
 
@@ -297,6 +298,7 @@ object MasterServer extends SimpleRoutingApp {
             }
         }
 
+        // todo - insert "wall"
         lazy val userPostRouter = {
           get {
             path("user" / "posts" / IntNumber) {
@@ -419,6 +421,48 @@ object MasterServer extends SimpleRoutingApp {
                 (userId, profileId, picId) => {
                   complete {
                     val status = Await.result(workerList(0) ? deleteUserProfileAlbumPic(userId, profileId, picId), timeout.duration).asInstanceOf[String]
+                    status.toString
+                  }
+                }
+              }
+            }
+        }
+
+        lazy val userPostCommentRouter = {
+          get {
+            path("users" / "wall" / "post" / "comments" / IntNumber / IntNumber) {
+              (userId, postId) => {
+                respondWithMediaType(MediaTypes.`application/json`) {
+                  complete {
+                    val comments : List[Comment] = Await.result(workerList(0) ? getCommentsOnUserWallPost(userId, postId), timeout.duration).asInstanceOf[List[Comment]]
+                    val commentsJson = comments.toJson
+                    commentsJson.toString()
+                  }
+                }
+              }
+            }
+          } ~
+            post {
+              path("users" / "wall" / "post" / "comments" / "save" / IntNumber / IntNumber) {
+                (userId, postId) => {
+                  entity(as[List[Comment]]) {
+                    comments => {
+
+                      val status = Await.result(workerList(0) ? saveCommentsOnUserWallPost(userId, postId, comments), timeout.duration).asInstanceOf[String]
+                      complete {
+                        status.toString
+                      }
+
+                    }
+                  }
+                }
+              }
+            } ~
+            delete {
+              path("users" / "profile" / "album" / "pics" / IntNumber / IntNumber / IntNumber) {
+                (userId, postId, commentId) => {
+                  complete {
+                    val status = Await.result(workerList(0) ? deleteCommentOnUserWallPost(userId, postId, commentId), timeout.duration).asInstanceOf[String]
                     status.toString
                   }
                 }
