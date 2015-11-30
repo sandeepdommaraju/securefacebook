@@ -1,7 +1,7 @@
 import Data.FirstClassData
-import Nodes.{Profile, User}
+import Nodes.{Page, Profile, User}
 import akka.actor.{Actor, ActorSystem}
-import common.UserDTO
+import common.{PageDTO, FriendDTO, UserDTO}
 
 /**
   * Created by sunito on 11/28/15.
@@ -15,6 +15,17 @@ case class getUserProfile(id : Int)
 case class saveUserProfile(profile: Profile)
 case class deleteUserProfile(id : Int)
 
+case class getFriendList(id : Int)
+case class saveFriendList(id : Int, friendList : List[FriendDTO])
+//case class deleteFriend(id : Int, friend_id : Int)
+
+case class getUserPages(userId : Int)
+case class savePage(pageDTO: PageDTO)
+case class deletePage(pageId : Int)
+
+case class getPageProfile(pageId : Int)
+case class savePageProfile(profile : Profile)
+case class deletePageProfile(pageId : Int)
 
 class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
 
@@ -31,7 +42,7 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
               sender ! userDTO //UserDTO(1, "sandom", "sandeep", "dommaraju", "Male", "05-05-1988")
 
     case saveUser(UserDTO(id, handle, first_name, last_name, sex, birthday))
-          =>  val user : User = new User(id, handle, first_name, last_name, sex, birthday, null, null, null, null, null, null)
+          =>  val user : User = new User(id, handle, first_name, last_name, sex, birthday, None, None, None, None, None, None)
               userMap.put(id , user)
               println("saving user: " + id)
               println(sender)
@@ -66,6 +77,94 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
           =>  profileMap.remove(id)
               sender ! "deleted user profile: " + id
 
+    /**
+      * CRUD of friend List
+      */
+
+    case getFriendList(id : Int)
+          =>  val friendList : List[FriendDTO] = userMap.get(id).u_friends.getOrElse(null)
+              sender ! friendList
+
+    case saveFriendList(userId : Int, friendList : List[FriendDTO])
+          =>  val user : User = userMap.get(userId)
+              val m_user = user.copy(u_friends = Some(friendList))
+              userMap.put(userId, m_user)
+              val currUserFriendDTO : FriendDTO = new FriendDTO(userId, m_user.handle)
+              for (friend <- friendList) {
+                val f_id = friend.id
+                val f_user : User = userMap.get(f_id)
+                val f_user_friends : List[FriendDTO] = f_user.u_friends.getOrElse(null)
+                if (f_user_friends == null) {
+                  val fn_user = f_user.copy(u_friends = Some(List(currUserFriendDTO)))
+                  userMap.put(f_id, fn_user)
+                } else {
+                  val fn_user_friends = f_user_friends :+ currUserFriendDTO
+                  val fn_user = f_user.copy(u_friends = Some(fn_user_friends))
+                  userMap.put(f_id, fn_user)
+                }
+              }
+              sender ! "saved friend list for user: " + userId
+
+    /**
+      * CRUD of user pages
+      */
+
+    case getUserPages(userId : Int)
+          =>  val pageIdList : List[Int] = userMap.get(userId).u_pages.getOrElse(null)
+              if (pageIdList == null) {
+                sender ! List()
+              } else {
+                var pages: List[PageDTO] = List()
+                for (pageId <- pageIdList) {
+                  val page: Page = pageMap.get(pageId)
+                  val pageDTO: PageDTO = page.getDTO()
+                  pages = pages :+ pageDTO
+                }
+                println(pages)
+                sender ! pages
+              }
+
+    case savePage(pageDTO: PageDTO)
+          => val page : Page = new Page(pageDTO.id, pageDTO.owner_user_id, pageDTO.page_name, None, None, None)
+             pageMap.put(pageDTO.id, page)
+             //update user page list
+             val user : User = userMap.get(pageDTO.owner_user_id)
+             val pageL : List[Int] = user.u_pages.getOrElse(null)
+             var t_pageL : List[Int] = List()
+             if (pageL == null) {
+               t_pageL = t_pageL :+ pageDTO.id
+             } else {
+               t_pageL = t_pageL ::: pageL
+               t_pageL = t_pageL :+ pageDTO.id
+             }
+             val t_user : User = user.copy(u_pages = Some(t_pageL))
+             userMap.put(pageDTO.owner_user_id, t_user)
+             println(userMap)
+             sender ! "saved page: " + pageDTO.id +" for user: " + pageDTO.owner_user_id
+
+    /**
+      * CRUD of page profiles
+      */
+
+    case getPageProfile(pageId : Int)
+          => val t_page : Page = pageMap.get(pageId)
+             //println(pageMap)
+             //println(t_page)
+             val profileId = t_page.page_profile
+             //println(profileId)
+             //println(profileId.getOrElse(1))
+             val profile : Profile = profileMap.get(profileId.getOrElse(1))
+             //println(profileMap)
+             sender ! profile
+
+    case savePageProfile(profile : Profile)
+          => val pageId = profile.userOrPageId
+             profileMap.put(profile.id, profile)
+             //println(profileMap)
+             val page : Page = pageMap.get(pageId)
+             val m_page = page.copy(page_profile = Some(profile.id))
+             pageMap.put(pageId, m_page)
+             sender ! "saved page profile: " + profile.id + " on page: " + pageId
 
     case default => println("Default message")
   }

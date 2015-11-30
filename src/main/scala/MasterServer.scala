@@ -6,7 +6,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import common.JsonImplicits._
-import common.{UserProfileDTO, UserDTO}
+import common.{PageDTO, FriendDTO, UserProfileDTO, UserDTO}
 import spray.http.MediaTypes
 import spray.routing._
 import spray.http.MediaTypes
@@ -41,7 +41,10 @@ object MasterServer extends SimpleRoutingApp {
         startServer(interface = "localhost", port = 8080) {
 
           userRouter~
-          userProfileRouter
+          userProfileRouter~
+          friendRouter~
+          pageRouter~
+          pageProfileRouter
 
         }
 
@@ -129,6 +132,124 @@ object MasterServer extends SimpleRoutingApp {
             }
         }
 
+        lazy val friendRouter = {
+
+          get {
+            // get list of friends
+            path("users" / "friends" / IntNumber) {
+              id => {
+                respondWithMediaType(MediaTypes.`application/json`) {
+                  complete {
+                    val friends : List[FriendDTO] = Await.result(workerList(0) ? getFriendList(id), timeout.duration).asInstanceOf[List[FriendDTO]]
+                    val friendsJson = friends.toJson
+                    friendsJson.toString()
+                  }
+                }
+              }
+            }
+          } ~
+          post {
+            // save list of friends
+            path("users" / "friends" / "save" / IntNumber) {
+              id => {
+                entity(as[List[FriendDTO]]) {
+                  friends => {
+                    val status = Await.result(workerList(0) ? saveFriendList(id, friends), timeout.duration).asInstanceOf[String]
+                    complete {
+                      status.toString
+                    }
+
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        lazy val pageRouter = {
+
+          get {
+            path("users" / "pages" / IntNumber) {
+              userId => {
+                respondWithMediaType(MediaTypes.`application/json`) {
+                  complete {
+                    val pages = Await.result(workerList(0) ? getUserPages(userId), timeout.duration).asInstanceOf[List[PageDTO]]
+                    val pagesJson = pages.toJson
+                    pagesJson.toString()
+                  }
+                }
+              }
+            }
+          } ~
+            post {
+              path("users" / "pages" / "save" / IntNumber) {
+                userId => {
+                  entity(as[PageDTO]) {
+                    pageDTO => {
+
+                      val status = Await.result(workerList(0) ? savePage(pageDTO), timeout.duration).asInstanceOf[String]
+                      complete {
+                        status.toString
+                      }
+
+                    }
+                  }
+                }
+              }
+            }
+            /*delete {
+              path("users" / "pages" / IntNumber) {
+                pageId => {
+                  complete {
+                    val status = Await.result(workerList(0) ? deleteUser(id), timeout.duration).asInstanceOf[String]
+                    status.toString
+                  }
+                }
+              }
+            }*/
+
+        }
+
+        lazy val pageProfileRouter = {
+
+            get {
+              path("pages" / "profile" / IntNumber) {
+                pageId => {
+                  respondWithMediaType(MediaTypes.`application/json`) {
+                    complete {
+                      val profile : Profile = Await.result(workerList(0) ? getPageProfile(pageId), timeout.duration).asInstanceOf[Profile]
+                      val userProfileJson = profile.toJson
+                      userProfileJson.toString()
+                    }
+                  }
+                }
+              }
+            } ~
+              post {
+                path("pages" / "profile" / "save") {
+                  entity(as[Profile]) {
+                    profile =>  {
+
+                      val status = Await.result(workerList(0) ? savePageProfile(Profile(profile.id, profile.userOrPageId, false, profile.description, profile.email, profile.pic)), timeout.duration).asInstanceOf[String]
+                      complete {
+                        status.toString
+                      }
+
+                    }
+                  }
+                }
+              } ~
+              delete {
+                path("pages"/ "profile" / IntNumber) {
+                  pageId => {
+                    complete {
+                      val status = Await.result(workerList(0) ? deletePageProfile(pageId), timeout.duration).asInstanceOf[String]
+                      status.toString
+                    }
+                  }
+                }
+              }
+          }
 
       }
 }

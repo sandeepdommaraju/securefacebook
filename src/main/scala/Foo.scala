@@ -64,3 +64,21 @@
 //  println("Finish")
 //
 //}
+
+object Foo extends App {
+
+  case class Car (val name : String, val drivers : Option[List[String]])
+
+  val honda : Car = new Car("civic", None)
+
+  //val d : List[String] = honda.drivers.getOrElse(null)
+
+  val someDrivers = honda.drivers
+
+  someDrivers match {
+    case Some(v) => println(v)
+    case None => println("no drivers")
+  }
+
+
+}

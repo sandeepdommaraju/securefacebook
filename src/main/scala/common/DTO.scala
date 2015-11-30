@@ -17,3 +17,10 @@ case class UserProfileDTO ( id : Int,
                             description : String,
                             email : String,
                             pic : String)
+
+case class FriendDTO ( id : Int,
+                       handle : String)
+
+case class PageDTO ( id : Int,
+                     owner_user_id : Int,
+                     page_name : String)
