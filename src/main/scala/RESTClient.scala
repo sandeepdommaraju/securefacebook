@@ -9,7 +9,7 @@ import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.io.IO
 import akka.pattern.ask
-import common.{UserProfileDTO, UserDTO}
+import common.{ProfileDTO, UserDTO}
 import spray.can.Http
 import spray.client.pipelining._
 import spray.httpx.SprayJsonSupport
@@ -67,7 +67,7 @@ object RESTClient extends App {
       log.error(error, "Failure!!!")
   }
 
-  val userProfile : Profile = new Profile(201, 1, true, "my profile", "test@test.com", "yellow stone")
+  val userProfile : ProfileDTO = new ProfileDTO(201, 1, true, "my profile", "test@test.com", "yellow stone")
 
   val f = pipeline {
     Post("http://localhost:8080/users/profile/save", userProfile)

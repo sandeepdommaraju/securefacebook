@@ -10,7 +10,7 @@ case class Page (id : Int,                   // unique page id
                  page_name : String,          // page name
                  page_profile : Option[Int], // pageProfile
                  posts : Option[List[Int]],  // list of posts in this page (assumption: only owner can post in page)
-                 likes : Option[List[Int]])  // list of userIds who liked this page
+                 activity : Option[Int])  // list of userIds who liked this page
         extends  basic {
 
   def getDTO() = {

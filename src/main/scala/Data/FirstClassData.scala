@@ -19,4 +19,12 @@ trait FirstClassData {
   var postMap : ConcurrentHashMap[Int, Post] = new ConcurrentHashMap()
 
   var commentMap : ConcurrentHashMap[Int, Comment] = new ConcurrentHashMap()
+
+  var albumMap : ConcurrentHashMap[Int, Album] = new ConcurrentHashMap()
+
+  val picMap : ConcurrentHashMap[Int, Pic] = new ConcurrentHashMap()
+
+  val likeMap : ConcurrentHashMap[Int, Like] = new ConcurrentHashMap()
+
+  val shareMap : ConcurrentHashMap[Int, Share] = new ConcurrentHashMap()
 }

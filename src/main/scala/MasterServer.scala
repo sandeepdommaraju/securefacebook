@@ -47,6 +47,7 @@ object MasterServer extends SimpleRoutingApp {
           pageProfileRouter~
           pagePostRouter~
           userPostRouter
+          //albumRouter
 
         }
 
@@ -113,7 +114,7 @@ object MasterServer extends SimpleRoutingApp {
                 entity(as[Profile]) {
                   profile =>  {
 
-                    val status = Await.result(workerList(0) ? saveUserProfile(Profile(profile.id, profile.userOrPageId, true, profile.description, profile.email, profile.pic)), timeout.duration).asInstanceOf[String]
+                    val status = Await.result(workerList(0) ? saveUserProfile(profile.getDTO()), timeout.duration).asInstanceOf[String]
                     complete {
                       status.toString
                     }
@@ -232,7 +233,7 @@ object MasterServer extends SimpleRoutingApp {
                   entity(as[Profile]) {
                     profile =>  {
 
-                      val status = Await.result(workerList(0) ? savePageProfile(Profile(profile.id, profile.userOrPageId, false, profile.description, profile.email, profile.pic)), timeout.duration).asInstanceOf[String]
+                      val status = Await.result(workerList(0) ? savePageProfile(Profile(profile.id, profile.userOrPageId, false, profile.description, profile.email, profile.pic, None)), timeout.duration).asInstanceOf[String]
                       complete {
                         status.toString
                       }
@@ -336,6 +337,10 @@ object MasterServer extends SimpleRoutingApp {
               }
             }
         }
+
+        /*lazy val albumRouter =
+
+        }*/
 
       }
 }

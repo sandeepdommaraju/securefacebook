@@ -11,12 +11,13 @@ case class UserDTO  ( id : Int,
                       sex : String,
                       birthday : String)
 
-case class UserProfileDTO ( id : Int,
-                            userOrPageId : Int,
-                            userOrPage : Boolean,
-                            description : String,
-                            email : String,
-                            pic : String)
+// user can have a profile, page can have a profile
+case class ProfileDTO(id : Int,
+                      userOrPageId : Int,
+                      userOrPage : Boolean,
+                      description : String,
+                      email : String,
+                      pic : String)
 
 case class FriendDTO ( id : Int,
                        handle : String)

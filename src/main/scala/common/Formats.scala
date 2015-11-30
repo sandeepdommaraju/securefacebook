@@ -21,17 +21,19 @@ object JsonImplicits extends DefaultJsonProtocol with SprayJsonSupport{
 
   implicit val friendRequestFormat = jsonFormat3(FriendRequest)
 
-  implicit val postFormat = jsonFormat6(Post)
+  implicit val postFormat = jsonFormat5(Post)
 
   implicit val pageFormat = jsonFormat6(Page)
 
-  implicit val profileFormat = jsonFormat6(Profile)
+  implicit val profileFormat = jsonFormat7(Profile)
 
   implicit val friendDTOFormat = jsonFormat2(FriendDTO)
 
   implicit val userFormat = jsonFormat12(User)
 
   implicit val userDTOFormat = jsonFormat6(UserDTO)
+
+  implicit val profileDTOFormat = jsonFormat6(ProfileDTO)
 
   implicit val pageDTOFormat = jsonFormat3(PageDTO)
 

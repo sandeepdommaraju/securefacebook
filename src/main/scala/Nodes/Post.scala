@@ -10,8 +10,9 @@ case class Post (id : Int,
                                        // if this Post is a pic -- ???
                  postOnPage : Boolean, // true if post is on page; false if post is on wall
                  post_msg : String,    // postOrPic
-                 comments : Option[List[Int]], // List of commentIds
-                 likes : Option[List[Int]]     // List of userIds who liked
+                 //comments : Option[List[Int]], // List of commentIds
+                 //likes : Option[List[Int]]     // List of userIds who liked
+                 activity : Option[Int]
                  )
            extends basic {
 

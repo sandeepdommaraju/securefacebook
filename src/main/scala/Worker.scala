@@ -1,7 +1,7 @@
 import Data.FirstClassData
 import Nodes.{Post, Page, Profile, User}
 import akka.actor.{Actor, ActorSystem}
-import common.{PostDTO, PageDTO, FriendDTO, UserDTO}
+import common._
 
 /**
   * Created by sunito on 11/28/15.
@@ -12,7 +12,7 @@ case class saveUser(userDTO : UserDTO) //id : Int, handle : String, first_name :
 case class deleteUser(id : Int)
 
 case class getUserProfile(id : Int)
-case class saveUserProfile(profile: Profile)
+case class saveUserProfile(profile: ProfileDTO)
 case class deleteUserProfile(id : Int)
 
 case class getFriendList(id : Int)
@@ -73,13 +73,13 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
               sender ! profile
 
 
-    case saveUserProfile(Profile(id, userOrPageId, userOrPage, description, email, pic))
+    case saveUserProfile(ProfileDTO(id, userOrPageId, userOrPage, description, email, pic))
           => val userId = userOrPageId
              val user : User = userMap.get(userId)
              println(userMap)
              val m_user = user.copy(u_profile_id = Some(id))
              userMap.put(userId, m_user)
-             profileMap.put(id, new Profile(id, userOrPageId, userOrPage, description, email, pic))
+             profileMap.put(id, new Profile(id, userOrPageId, true, description, email, pic, None))
              //println(profileMap)
              sender ! "saved user profile: " + id
 
@@ -194,7 +194,7 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
           =>  val page : Page = pageMap.get(pageId)
               var postIdList : List[Int] = List()
               for (post <- posts) {
-                postMap.put(post.id, new Post(post.id, pageId, post.postOnPage, post.post_msg, None, None))
+                postMap.put(post.id, new Post(post.id, pageId, post.postOnPage, post.post_msg, None))
                 postIdList = postIdList :+ post.id
               }
               var curr_posts : List[Int] = page.posts.getOrElse(List())
@@ -225,7 +225,7 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
           =>  val user : User = userMap.get(userId)
               var postIdList : List[Int] = List()
               for (post <- posts) {
-                postMap.put(post.id, new Post(post.id, userId, post.postOnPage, post.post_msg, None, None))
+                postMap.put(post.id, new Post(post.id, userId, post.postOnPage, post.post_msg, None))
                 postIdList = postIdList :+ post.id
               }
               var curr_posts : List[Int] = user.u_wall.getOrElse(List())
