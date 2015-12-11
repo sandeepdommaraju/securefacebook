@@ -21,7 +21,7 @@ object MasterServer extends SimpleRoutingApp {
 
       implicit val system = ActorSystem("SecureFacebook")
 
-      implicit val timeout = Timeout(500.millis)
+      implicit val timeout = Timeout(5000.millis)
 
       var workerList : List[ActorRef] = List()
 

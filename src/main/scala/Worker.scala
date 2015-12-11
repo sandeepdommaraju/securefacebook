@@ -116,7 +116,8 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
       */
 
     case getFriendList(id : Int)
-          =>  val friendList : List[FriendDTO] = userMap.get(id).u_friends.getOrElse(null)
+          =>  //println(userMap.get(id))
+              val friendList : List[FriendDTO] = userMap.get(id).u_friends.getOrElse(null)
               sender ! friendList
 
     case saveFriendList(userId : Int, friendList : List[FriendDTO])
@@ -137,6 +138,7 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
                   userMap.put(f_id, fn_user)
                 }
               }
+              //println(userMap)
               sender ! "saved friend list for user: " + userId
 
     /**
@@ -173,7 +175,7 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
              }
              val t_user : User = user.copy(u_pages = Some(t_pageL))
              userMap.put(pageDTO.owner_user_id, t_user)
-             println(userMap)
+             //println(userMap)
              sender ! "saved page: " + pageDTO.id +" for user: " + pageDTO.owner_user_id
 
     /**
@@ -182,19 +184,19 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
 
     case getPageProfile(pageId : Int)
           => val t_page : Page = pageMap.get(pageId)
-             //println(pageMap)
-             //println(t_page)
+             //println("currPageMap: " +pageMap)
+             //println("currpage: " + t_page)
              val profileId = t_page.page_profile
-             //println(profileId)
-             //println(profileId.getOrElse(1))
+             //println("currpage_profileId: " + profileId)
+             //println("profileId_getorelse: " + profileId.getOrElse(1))
              val profile : Profile = profileMap.get(profileId.getOrElse(1))
-             //println(profileMap)
+             //println("currpage_profilemap" + profileMap)
              sender ! profile
 
     case savePageProfile(profile : Profile)
           => val pageId = profile.userOrPageId
              profileMap.put(profile.id, profile)
-             //println(profileMap)
+             //println("saving profile in Worker: " + profileMap)
              val page : Page = pageMap.get(pageId)
              val m_page = page.copy(page_profile = Some(profile.id))
              pageMap.put(pageId, m_page)
@@ -243,6 +245,7 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
                 val post : PostDTO = postMap.get(postId).getDTO()
                 posts = posts :+ post
               }
+              println("GET posts on wall: " + userId + "  ### " + posts)
               sender ! posts
 
     case saveUserPosts(userId : Int, posts : List[PostDTO])
@@ -255,6 +258,7 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
               var curr_posts : List[Int] = user.u_wall.getOrElse(List())
               curr_posts = curr_posts ::: postIdList
               userMap.put(userId, user.copy(u_wall = Some(curr_posts)))
+              println("Worker: currentPosts on Wall: " + userId + " :--> " +curr_posts)
               sender ! "saved posts list for user: " + userId
 
     case deleteUserPosts(userId : Int) // on his wall

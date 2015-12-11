@@ -1,7 +1,7 @@
 package common
 
 import java.security.MessageDigest
-import Nodes.{Post, Page, Profile}
+import Nodes.{Page, Profile}
 import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.io.IO
@@ -27,6 +27,7 @@ import common.JsonImplicits._
 
 
 object LatestClient extends App {
+
   // we need an ActorSystem to host our application in
   implicit val system = ActorSystem("facebook-simple-spray-client")
   //  implicit val timeout = Timeout(30 seconds)
@@ -35,19 +36,16 @@ object LatestClient extends App {
 
   // execution context for futures below
   val log = Logging(system, getClass)
-
   log.info("Requesting facebook info...")
 
   import SprayJsonSupport._
-
   println("Client started")
 
-
+  val jsonDirPath : String = "/home/sunito/Desktop/"
   implicit val formats = DefaultFormats
-
   val pipeline = sendReceive ~> unmarshal[String]
 
-  val fileName = "C:\\Users\\Samantha\\tmp\\userdto.json"
+  val fileName = jsonDirPath + "userDTO.json" //"C:\\Users\\Samantha\\tmp\\userdto.json"
   val lines = Source.fromFile(fileName).mkString
 
   val credentials = parse(lines).extract[List[UserDTO]]
@@ -85,7 +83,7 @@ object LatestClient extends App {
     }
     responseFuture onComplete {
       case Success(t) =>
-     // println("Get:" + t)
+      // println("Get:" + t)
       //val temp  = t.parseJson.asInstanceOf[JsObject]
       //  println (temp.getFields("handle").last)
 
@@ -98,10 +96,10 @@ object LatestClient extends App {
 
   }
 
-//Profiles
+  //Profiles
   val pipeline1 = sendReceive ~> unmarshal[String]
 
-  val profileName = "C:\\Users\\Samantha\\tmp\\userprofiledto.json"
+  val profileName = jsonDirPath + "userProfileDTO.json" //"C:\\Users\\Samantha\\tmp\\userprofiledto.json"
   val profilelines = Source.fromFile(profileName).mkString
 
   val profilecredentials = parse(profilelines).extract[List[Profile]]
@@ -118,7 +116,7 @@ object LatestClient extends App {
     }
     responseFuture onComplete {
       case Success(t) =>
-       // println("The user: " + t)
+      // println("The user: " + t)
 
       case Success(somethingUnexpected) =>
         log.warning("The Facebook API call was successful but returned something unexpected: '{}'.", somethingUnexpected)
@@ -130,7 +128,7 @@ object LatestClient extends App {
 
   //Friends
   val pipeline2 = sendReceive ~> unmarshal[String]
- for (i <- 100001 to 100900) {
+  for (i <- 100001 to 100900) {
 
     //import common.JsonImplicits._
     //val frnd = i + 1
@@ -155,7 +153,7 @@ object LatestClient extends App {
   //Page
   val pipeline3 = sendReceive ~> unmarshal[String]
 
-  val pageName = "C:\\Users\\Samantha\\tmp\\pagedto.json"
+  val pageName = jsonDirPath + "pageDTO.json" //"C:\\Users\\Samantha\\tmp\\pagedto.json"
   val pagelines = Source.fromFile(pageName).mkString
 
   val pagecredentials = parse(pagelines).extract[List[PageDTO]]
@@ -171,7 +169,7 @@ object LatestClient extends App {
     }
     responseFuture onComplete {
       case Success(t) =>
-   //    println("The user: " + t)
+      //    println("The user: " + t)
 
       case Success(somethingUnexpected) =>
         log.warning("The Facebook API call was successful but returned something unexpected: '{}'.", somethingUnexpected)
@@ -181,34 +179,37 @@ object LatestClient extends App {
     }
   }
 
-/*
-  //User Posts
-  val pipeline4 = sendReceive ~> unmarshal[String]
+  /*
+    //User Posts
+    val pipeline4 = sendReceive ~> unmarshal[String]
 
-  val postName = "C:\\Users\\Samantha\\tmp\\userpost.json"
-  val postlines = Source.fromFile(profileName).mkString
+    val postName = "C:\\Users\\Samantha\\tmp\\userpost.json"
+    val postlines = Source.fromFile(profileName).mkString
 
-  val postcredentials = parse(postlines).extract[List[Post]]
+    val postcredentials = parse(postlines).extract[List[Post]]
 
-  for (cred <- postcredentials) {
+    for (cred <- postcredentials) {
 
-    import common.JsonImplicits._
+      import common.JsonImplicits._
 
-    //val newprofile: UserProfileDTO = new UserProfileDTO(cred.id, cred.userOrPageId, cred.userOrPage, cred.description, cred.email, cred.pic)
+      //val newprofile: UserProfileDTO = new UserProfileDTO(cred.id, cred.userOrPageId, cred.userOrPage, cred.description, cred.email, cred.pic)
 
-    val responseFuture = pipeline1 {
-      Post("http://localhost:8080/user/posts/save", cred)
-    }
-    responseFuture onComplete {
-      case Success(t) =>
-       println("The userposts: " + t)
+      val responseFuture = pipeline1 {
+        Post("http://localhost:8080/user/posts/save", cred)
+      }
+      responseFuture onComplete {
+        case Success(t) =>
+         println("The userposts: " + t)
 
-      case Success(somethingUnexpected) =>
-        log.warning("The Facebook API call was successful but returned something unexpected: '{}'.", somethingUnexpected)
+        case Success(somethingUnexpected) =>
+          log.warning("The Facebook API call was successful but returned something unexpected: '{}'.", somethingUnexpected)
 
-      case Failure(error) =>
-        log.error(error, "Failure in saving UserPosts!!!")
-    }
-  }*/
+        case Failure(error) =>
+          log.error(error, "Failure in saving UserPosts!!!")
+      }
+    }*/
+
+ // var post_pics_on_userProfileAlbum_Scheduler = system.scheduler.schedule(0 millisecond, 5 milliseconds)(postPicsOnUserProfileAlbum())
+
 
 }
