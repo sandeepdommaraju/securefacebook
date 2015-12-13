@@ -1,5 +1,6 @@
 package common
 
+import java.security.PublicKey
 import java.util.concurrent.atomic.AtomicInteger
 
 import Nodes._
@@ -42,5 +43,6 @@ object JsonImplicits extends DefaultJsonProtocol with SprayJsonSupport{
   implicit val albumDTOFormat = jsonFormat4(AlbumDTO)
 
   implicit val picDTOFormat = jsonFormat4(PicDTO)
+
 
 }

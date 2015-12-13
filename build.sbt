@@ -20,7 +20,8 @@ libraryDependencies ++= {
     "com.etaty.rediscala" %%  "rediscala"       % "1.5.0",
     "com.typesafe.akka"   %%  "akka-testkit"    % akkaV   % "test",
     "org.specs2"          %%  "specs2-core"     % "2.3.11" % "test",
-    "net.liftweb"         %%  "lift-json"       % "2.6+"
+    "net.liftweb"         %%  "lift-json"       % "2.6+",
+    "commons-codec"       %   "commons-codec"   % "1.10"
   )
 }
 

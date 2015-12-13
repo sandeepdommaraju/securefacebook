@@ -1,62 +1,70 @@
 package routers
 
-import Data.FirstClassData
-import spray.http.MediaTypes
-import spray.routing.SimpleRoutingApp
-import spray.json._
-import Nodes._
+import akka.actor.Props
+import akka.pattern.ask
+import akka.util.Timeout
+import service._
+import spray.routing.HttpServiceActor
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 
 /**
   * Created by sunito on 11/22/15.
   */
 
-trait UserRouter extends SimpleRoutingApp
-with FirstClassData {
+class UserRouter extends HttpServiceActor with AuthRouter {
 
-  import common.JsonImplicits._
+  implicit val timeout = Timeout(500.millis)
+  val userService = context.actorOf(Props[UserService], name = "userService")
 
- lazy val userRouter =
+  def receive = runRoute(userRoute)
+
+  val userRoute = {
 
     get {
-      path ("users"  / IntNumber) {
-        id => {
-          respondWithMediaType(MediaTypes.`application/json`) {
-            complete {
-              val usr : User = userMap.get(id)
-              if (usr != null) {
-                val userJSON = usr.toJson
-                "" + userJSON
-              } else
-                " Cannot get User: " + id
+      path("public-key" / IntNumber) {
+        userId => {
+          val f = (userService ? getUserPublicKey(userId)).mapTo[String].map(s => s"${s}")
+          complete(f)
+        }
+      }
+    } ~
+      post {
+        path("public-key" / "save") {
+          entity(as[String]) {
+            pubKey => {
+              val f = (userService ? AddPublicKey(pubKey)).mapTo[String].map(s => s"${s}")
+              complete(f)
+            }
+          }
+        }
+      } ~
+      get {
+        ctx =>
+          path("basic-details" / "save" / IntNumber) {
+            userId => {
+              val f = (userService ? GetUserBasicInfo(userId)).mapTo[String].map(s => s"{$s}")
+              complete(f)
+            }
+          }
+      } ~
+      post {
+        path("basic-details" / "save" / IntNumber) {
+          userId => {
+            entity(as[String]) {
+              msg => {
+                authenticateUser(userId, msg) {
+                  complete {
+                    userService ! SaveUserBasicInfo(userId, msg.split("#sep#")(1))
+                    "Posted user basic details: " + userId
+                  }
+                }
+              }
             }
           }
         }
       }
-    }~
-    post {
-      path ("users" / "save") {
-        entity(as[User]) {
-          person => complete {
-            userMap.put(person.id, person)
-            "added user: " + person.id
-          }
-        }
-      }
-    }~
-    delete {
-      path ("users" / IntNumber) {
-        id => {
-          complete {
-            if (userMap.containsKey(id)) {
-              userMap.remove(id)
-              "deleted user: " + id
-            } else {
-              "Cannot delete user: " + id
-            }
-          }
-        }
-      }
-    }
-
+  }
 }
