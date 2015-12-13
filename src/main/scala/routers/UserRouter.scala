@@ -42,9 +42,9 @@ class UserRouter extends HttpServiceActor with AuthRouter {
         }
       } ~
       get {
-        ctx =>
-          path("basic-details" / "save" / IntNumber) {
+          path("basic-details" / IntNumber) {
             userId => {
+              println("in router: GET basic-details: " + userId)
               val f = (userService ? GetUserBasicInfo(userId)).mapTo[String].map(s => s"{$s}")
               complete(f)
             }

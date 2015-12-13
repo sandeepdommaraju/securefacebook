@@ -1,0 +1,49 @@
+package routers
+
+/**
+  * Created by sunito on 12/10/15.
+  */
+
+
+import akka.actor.Props
+import akka.pattern.ask
+import akka.util.Timeout
+import service.{GetProfile, ProfileService, SaveUserProfile}
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+
+class ProfileRouter extends AuthRouter {
+
+  implicit val timeout = Timeout(500.millis)
+  val profileService = context.actorOf(Props[ProfileService], name = "profileService")
+
+  def receive = runRoute(profileRoute)
+
+  val profileRoute = {
+
+    get {
+      path("user" / IntNumber) {
+        userId => {
+          val f = (profileService ? GetProfile(userId)).mapTo[String].map(s => s"${s}")
+          complete(f)
+        }
+      }
+    } ~
+      post {
+          path("user" / "save" / IntNumber) {
+            userId => {
+              entity(as[String]) {
+                msg =>
+                  authenticateUser(userId, msg) {
+                    complete {
+                      profileService ! SaveUserProfile(userId, msg.split("#sep#")(1))
+                      "Saved UserProfile: " + userId
+                    }
+                  }
+              }
+            }
+          }
+      }
+  }
+}

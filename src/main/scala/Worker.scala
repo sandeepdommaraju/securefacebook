@@ -117,12 +117,13 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
 
     case getFriendList(id : Int)
           =>  //println(userMap.get(id))
-              val friendList : List[FriendDTO] = userMap.get(id).u_friends.getOrElse(null)
-              sender ! friendList
+              //val friendList : List[FriendDTO] = userMap.get(id).u_friends.getOrElse(null)
+              //sender ! friendList
+              ""
 
     case saveFriendList(userId : Int, friendList : List[FriendDTO])
           =>  val user : User = userMap.get(userId)
-              val m_user = user.copy(u_friends = Some(friendList))
+              /*val m_user = user.copy(u_friends = Some(friendList))
               userMap.put(userId, m_user)
               val currUserFriendDTO : FriendDTO = new FriendDTO(userId, m_user.handle)
               for (friend <- friendList) {
@@ -137,7 +138,7 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
                   val fn_user = f_user.copy(u_friends = Some(fn_user_friends))
                   userMap.put(f_id, fn_user)
                 }
-              }
+              }*/
               //println(userMap)
               sender ! "saved friend list for user: " + userId
 
