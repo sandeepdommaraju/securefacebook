@@ -34,6 +34,8 @@ object Client extends App with DigitalSignature{
 
   simulator ! AddFriends
 
+  simulator ! AddPages
+
   def verifyServer(msg : String, serverPubKey : PublicKey) = {
     verify(msg, serverPubKey)
   }

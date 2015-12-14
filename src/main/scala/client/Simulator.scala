@@ -5,6 +5,7 @@ import akka.actor.{Props, ActorRef, Actor}
 case object LoginUsers
 case object GetUserBasicDetails
 case object AddFriends
+case object AddPages
 
 /**
   * Created by sunito on 12/11/15.
@@ -26,6 +27,7 @@ class Simulator( totalUsers: Int, ServerIP : String, ServerPort : Int, runTime :
     case LoginUsers => loginUsers
     //case GetUserBasicDetails => getUserDetails
     case AddFriends => addFriends
+    case AddPages => addPages
     case default => "default msg"
   }
 
@@ -50,6 +52,13 @@ class Simulator( totalUsers: Int, ServerIP : String, ServerPort : Int, runTime :
     var u = 0
     for (u <- 1 to totalUsers){
       workerPool(u) ! AddFriends
+    }
+  }
+
+  def addPages = {
+    var u = 0
+    for (u <- 1 to totalUsers){
+      workerPool(u) ! AddPage
     }
   }
 

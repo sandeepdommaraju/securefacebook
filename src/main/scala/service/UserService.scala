@@ -6,10 +6,11 @@ import javax.crypto.spec.SecretKeySpec
 
 import Data.ProfileDB._
 import Data.UserDB._
+import Data.PageDB._
 import Data.SharableDB._
-import Nodes.{Sharable, User}
+import Nodes.{Profile, Page, Sharable, User}
 import akka.actor.Actor
-import common.UserDTO
+import common.{ProfileDTO, UserDTO, PageDTO}
 import security.DigitalSignature
 import server.Server
 import common.JsonImplicits._
@@ -31,6 +32,8 @@ case class GetUserBasicInfo(userId: Int)
 case class AddFriends(userId: Int)
 
 case class SaveUserSharable(userId: Int, sharableData : String)
+
+case class SavePageAndPageProfile(userId:Int, data:String)
 
 class UserService extends Actor with DigitalSignature {
 
@@ -64,6 +67,21 @@ class UserService extends Actor with DigitalSignature {
       sender ! Server.serverSign(userMap.get(userId).getDTO().toJson.toString())
     else
       sender ! "Invalid userId"
+//Sam
+    case SavePageAndPageProfile(userId, data)
+    => if(userMap.containsKey(userId)){
+      val pageId: Int = Server.pageIdGEN.addAndGet(1)
+      val profileId : Int = Server.profileIdGEN.addAndGet(1)
+      val user:User = userMap.get(userId)
+      userMap.put(userId, user.copy(u_pages = Some(List(pageId))))
+      val pageDTO : PageDTO = data.split("#sepdata#")(0).parseJson.convertTo[PageDTO]
+      val profileDTO : ProfileDTO = data.split("#sepdata#")(1).parseJson.convertTo[ProfileDTO]
+      val p : PageDTO = pageDTO.copy(id = pageId)
+      pageMap.put(pageId, new Page(p.id, p.owner_user_id, p.page_name, Some(profileId), null, null))
+      val pr : ProfileDTO = profileDTO.copy(id = profileId)
+      profileMap.put(profileId,new Profile(profileId,pageId,false,pr.description,pr.email,pr.pic,null))
+    }
+
 
     case AddFriends(userId)
     => var friendList: List[Int] = List()

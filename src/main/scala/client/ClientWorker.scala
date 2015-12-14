@@ -6,7 +6,7 @@ import Nodes.{Sharable, Viewer}
 import akka.actor.Actor
 import akka.event.Logging
 import common.JsonImplicits._
-import common.{ProfileDTO, UserDTO}
+import common.{PageDTO, ProfileDTO, UserDTO}
 import security.{AES, DigitalSignature}
 import spray.client.pipelining._
 import spray.json._
@@ -18,6 +18,8 @@ import scala.util.{Failure, Success}
 case object Login
 
 case class SetUserId(uid: Int)
+
+case object AddPage
 
 /**
   * Created by sunito on 12/11/15.
@@ -41,6 +43,7 @@ class ClientWorker(baseURL: String) extends Actor with DigitalSignature with AES
     case SetUserId(uid) => userId = uid
     //case GetUserBasicDetails => getBasicDetails
     case AddFriends => addFriends
+    case AddPage => createAndSendPageProfile
     case default => "default msg in client worker"
   }
 
@@ -140,6 +143,26 @@ class ClientWorker(baseURL: String) extends Actor with DigitalSignature with AES
     aesKey = encodeBASE64(generateAESKey.getEncoded)
     pubKey = encodeBASE64(keyPair.getPublic.getEncoded)
     sendPublicKey
+  }
+
+  //Sam
+  def createAndSendPageProfile = {
+    val pageDTO = new PageDTO(1,userId, "pagecreatedby: " + workerId)
+    val pageprofileDTO = new ProfileDTO(1,1,false,"PagecreatedBy"+ userId, "test@gmail.com","PicString")
+
+    val data = pageDTO.toJson.toString() + "#sepdata#" + pageprofileDTO.toJson.toString()
+    val msg : String = sign(data, keyPair.getPrivate)
+    clientWorkerLog.info("Sending POST request: createAndSendPageProfile: " + userId)
+    val f = pipeline {
+      Post(baseURL + "user/page/save/" + userId, msg)
+    }
+
+    handleGenericPostFuture(f, "in POST PageProfile")
+
+    /*f onComplete {
+      case Success(t) => println("PageCreated")//getPageProfile
+      case Failure(err) => clientWorkerLog.error(err.toString)
+    }*/
   }
 
   def handleGenericGetFuture(f: Future[String], customMsg: String) = {
