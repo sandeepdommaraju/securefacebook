@@ -7,7 +7,7 @@ import akka.actor.{ActorSystem, Props}
 import akka.routing._
 import akka.util.Timeout
 import routers._
-import security.RSA
+import security.{DigitalSignature, RSA}
 import spray.routing.SimpleRoutingApp
 
 import scala.concurrent.duration._
@@ -15,7 +15,7 @@ import scala.concurrent.duration._
 /**
   * Created by sunito on 12/10/15.
   */
-object Server extends  SimpleRoutingApp with RSA{
+object Server extends  SimpleRoutingApp with DigitalSignature{
 
   implicit val system = ActorSystem("SecureFacebookServer")
 
@@ -39,6 +39,7 @@ object Server extends  SimpleRoutingApp with RSA{
   var userIdGEN = new AtomicInteger(100000)
   var pageIdGEN = new AtomicInteger(200000)
   var profileIdGEN = new AtomicInteger(300000)
+  var sharableIDGEN = new AtomicInteger(900000)
 
   def main(args: Array[String]) {
 
@@ -63,5 +64,9 @@ object Server extends  SimpleRoutingApp with RSA{
       pathPrefix("activity") { rte => activityRouter ! rte }*/
     }
 
+  }
+
+  def serverSign (msg : String) = {
+    sign(msg, keyPair.getPrivate)
   }
 }

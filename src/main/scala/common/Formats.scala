@@ -44,5 +44,8 @@ object JsonImplicits extends DefaultJsonProtocol with SprayJsonSupport{
 
   implicit val picDTOFormat = jsonFormat4(PicDTO)
 
+  implicit val viewerFormat = jsonFormat2(Viewer)
+
+  implicit val sharableFormat = jsonFormat2(Sharable)
 
 }

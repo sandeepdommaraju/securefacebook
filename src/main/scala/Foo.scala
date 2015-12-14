@@ -63,23 +63,12 @@ object Foo extends App with DigitalSignature{
   val usaJSON = usa.toJson
 
   //println(usaJSON)
-
   //println("Finish")
 
   val cali = """{ "stateName" : "California", "cm" : "Andy" }"""
-
-  //println(cali)
-
   val cc = cali.parseJson
-
-  //println("cc: " + cc)
-
   val str = "digital-signature" + "#sep#" + usaJSON
-
-  //println(str)
-
   val sp = str.split("#sep#")
-
   println(sp(0))
   println(sp(1).parseJson.convertTo[Country])
 
@@ -90,7 +79,7 @@ object Foo extends App with DigitalSignature{
   val keyPair : KeyPair = getKeyPair
   val priKey : PrivateKey = keyPair.getPrivate
   val pubKey : PublicKey = keyPair.getPublic
-
+/*
 
   val clientSideSummary  = sha.digest(data.getBytes("UTF-8"))
   val clientSideEncodedSummary : String = encodeBASE64(clientSideSummary)
@@ -120,6 +109,28 @@ object Foo extends App with DigitalSignature{
   println("signedData: " + signedData)
 
   println(verify(signedData, pubKey))
+ */
+
+  var friendIds : List[Int] = List()
+  friendIds = friendIds :+ 1
+ friendIds = friendIds :+ 2
+ friendIds = friendIds :+ 3
+
+
+
+ var pubKeys : List[String] = List("a", "b", "c")
+
+ val send = friendIds.toJson+"#sep#" + pubKeys.toJson
+
+ val fs = send.split("#sep#")(0)
+ val ps = send.split("#sep#")(1)
+
+ val fsl = fs.parseJson.convertTo[List[Int]]
+ val psl = ps.parseJson.convertTo[List[String]]
+
+ println(fsl)
+ println(psl)
+
 
 }
 

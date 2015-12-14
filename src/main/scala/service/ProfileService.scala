@@ -30,7 +30,7 @@ class ProfileService extends Actor with DigitalSignature{
 
     case GetProfile(userId)
       => if (profileMap.containsKey(userId))
-            sender ! profileMap.get(userId).getDTO().toJson.toString()
+            sender ! Server.serverSign(profileMap.get(userId).getDTO().toJson.toString())
          else
             sender ! "Invalid userId to get Profile"
 

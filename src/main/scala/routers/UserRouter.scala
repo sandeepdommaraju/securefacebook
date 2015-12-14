@@ -65,6 +65,31 @@ class UserRouter extends HttpServiceActor with AuthRouter {
             }
           }
         }
+      }~
+      get {
+        path("add" / "friends" / IntNumber) {
+          userId => {
+            println("in router: GET AddFriends: " + userId)
+            val f = (userService ? AddFriends(userId)).mapTo[String].map(s => s"${s}")
+            complete(f)
+          }
+        }
+      }~
+      post {
+        path("sharable" / "save" / IntNumber) {
+          userId => {
+            entity(as[String]) {
+              msg => {
+                authenticateUser(userId, msg) {
+                  complete {
+                    userService ! SaveUserSharable(userId, msg.split("#sep#")(1))
+                    "Posted user basic details: " + userId
+                  }
+                }
+              }
+            }
+          }
+        }
       }
   }
 }
