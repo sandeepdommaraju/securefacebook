@@ -145,7 +145,7 @@ class ClientWorker(baseURL: String) extends Actor with DigitalSignature with AES
     sendPublicKey
   }
 
-  //Sam
+
   def createAndSendPageProfile = {
     val pageDTO = new PageDTO(1,userId, "pagecreatedby: " + workerId)
     val pageprofileDTO = new ProfileDTO(1,1,false,"PagecreatedBy"+ userId, "test@gmail.com","PicString")
@@ -157,12 +157,21 @@ class ClientWorker(baseURL: String) extends Actor with DigitalSignature with AES
       Post(baseURL + "user/page/save/" + userId, msg)
     }
 
-    handleGenericPostFuture(f, "in POST PageProfile")
+   // handleGenericPostFuture(f, "in POST PageProfile")
 
-    /*f onComplete {
-      case Success(t) => println("PageCreated")//getPageProfile
+    f onComplete {
+      case Success(t) => getPageProfile
       case Failure(err) => clientWorkerLog.error(err.toString)
-    }*/
+    }
+  }
+
+
+  def getPageProfile = {
+    println("Sending GET request: getPageProfile: " + userId)
+    val f = pipeline {
+      Get(baseURL + "user/pageprofile/" + userId)
+    }
+    handleGenericGetFuture(f, "in GetPageProfile")
   }
 
   def handleGenericGetFuture(f: Future[String], customMsg: String) = {

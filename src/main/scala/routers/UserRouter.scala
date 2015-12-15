@@ -81,6 +81,15 @@ class UserRouter extends HttpServiceActor with AuthRouter {
       }
     }~
     get {
+      path("pageprofile"/ IntNumber) {
+        userId => {
+          println("in router: GET PageProfile" + userId)
+          val f = (userService ? GetPageAndProfile(userId)).mapTo[String].map(s => s"${s}")
+          complete(f)
+        }
+      }
+    }~
+    get {
       path("add" / "friends" / IntNumber) {
         userId => {
           println("in router: GET AddFriends: " + userId)

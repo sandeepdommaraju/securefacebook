@@ -1,6 +1,7 @@
 package service
 
 import java.security.PublicKey
+import java.util.concurrent.ConcurrentHashMap
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 
@@ -34,6 +35,8 @@ case class AddFriends(userId: Int)
 case class SaveUserSharable(userId: Int, sharableData : String)
 
 case class SavePageAndPageProfile(userId:Int, data:String)
+
+case class GetPageAndProfile(userId:Int)
 
 class UserService extends Actor with DigitalSignature {
 
@@ -81,6 +84,27 @@ class UserService extends Actor with DigitalSignature {
       val pr : ProfileDTO = profileDTO.copy(id = profileId)
       profileMap.put(profileId,new Profile(profileId,pageId,false,pr.description,pr.email,pr.pic,null))
     }
+    case GetPageAndProfile(userId)
+      => if(userMap.containsKey(userId)){
+      var sendString: String = ""
+      val user:User = userMap.get(userId)
+      val pageId = user.u_pages.getOrElse(null).head
+      if(pageMap.containsKey(pageId)){
+        val pageObj : Page = pageMap.get(pageId)
+        sendString = pageObj.getDTO().toJson.toString()
+        val profileId : Int = pageObj.page_profile.getOrElse(0)
+        if(profileMap.containsKey(profileId)) {
+          sendString = sendString + "#sepdata#" + profileMap.get(profileId).getDTO().toJson.toString()
+        }
+      }
+      println("In getPageAndProfile" + sendString)
+      println("In getPageAndProfile" + sendString.toString())
+      //sender ! Server.serverSign(userMap.get(userId).getDTO().toJson.toString())
+      sender ! Server.serverSign(sendString.toString())
+    }else{
+      userServiceLog.error("CANT FIND USER in GETPAGEPROFILE")
+    }
+
 
 
     case AddFriends(userId)
