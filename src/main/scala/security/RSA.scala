@@ -4,13 +4,11 @@ import java.security._
 import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
 
-import org.apache.commons.codec.binary.Base64
-
 
 /**
   * Created by sunito on 12/11/15.
   */
-trait RSA {
+trait RSA extends coders{
 
   def getKeyPair : KeyPair = {
     KeyPairGenerator.getInstance("RSA").generateKeyPair()
@@ -32,14 +30,6 @@ trait RSA {
 
   def getPublicKey(bytes : Array[Byte]) : PublicKey = {
       KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(bytes))
-  }
-
-  def encodeBASE64(bytes: Array[Byte]): String = {
-    return Base64.encodeBase64String(bytes)
-  }
-
-  def decodeBASE64(text:String) : Array[Byte] = {
-    return Base64.decodeBase64(text)
   }
 
 }

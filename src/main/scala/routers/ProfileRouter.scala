@@ -8,7 +8,7 @@ package routers
 import akka.actor.Props
 import akka.pattern.ask
 import akka.util.Timeout
-import service.{GetProfile, ProfileService, SaveUserProfile}
+import service.{SavePicInUserProfileAlbum, GetProfile, ProfileService, SaveUserProfile}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -36,14 +36,27 @@ class ProfileRouter extends AuthRouter {
               entity(as[String]) {
                 msg =>
                   authenticateUser(userId, msg) {
-                    complete {
-                      profileService ! SaveUserProfile(userId, msg.split("#sep#")(1))
-                      "Saved UserProfile: " + userId
-                    }
+                    val f = (profileService ? SaveUserProfile(userId, msg.split("#sep#")(1))).mapTo[String].map(s => s"${s}")
+                    complete(f)
+                      //"Saved UserProfile: " + userId
                   }
               }
             }
           }
+      }~
+      post {
+        path("user" / "album" / "pic" / "save" / IntNumber / IntNumber) {
+          (userId, picId) => {
+            entity(as[String]) {
+              msg =>
+                authenticateUser(userId, msg) {
+                  val f = (profileService ? SavePicInUserProfileAlbum(userId, picId, msg.split("#sep#")(1))).mapTo[String].map(s => s"${s}")
+                  complete(f)
+                    //"Saved PicInUserProfileAlbum: " + userId
+                }
+            }
+          }
+        }
       }
   }
 }

@@ -19,8 +19,8 @@ object Server extends  SimpleRoutingApp with DigitalSignature{
 
   implicit val system = ActorSystem("SecureFacebookServer")
 
-  val userRouter = system.actorOf(Props[UserRouter].withRouter(RoundRobinPool(1)))
-  val profileRouter = system.actorOf(Props[ProfileRouter].withRouter(RoundRobinPool(1)))
+  val userRouter = system.actorOf(Props[UserRouter].withRouter(RoundRobinPool(10)))
+  val profileRouter = system.actorOf(Props[ProfileRouter].withRouter(RoundRobinPool(10)))
   /*val pageRouter = system.actorOf(Props[PageRouter].withRouter(RoundRobinPool(5)))
   val friendRouter = system.actorOf(Props[FriendRouter].withRouter(RoundRobinPool(5)))
   val postRouter = system.actorOf(Props[PostRouter].withRouter(RoundRobinPool(5)))
@@ -39,7 +39,9 @@ object Server extends  SimpleRoutingApp with DigitalSignature{
   var userIdGEN = new AtomicInteger(100000)
   var pageIdGEN = new AtomicInteger(200000)
   var profileIdGEN = new AtomicInteger(300000)
+  var albumIdGEN = new AtomicInteger(400000)
   var sharableIDGEN = new AtomicInteger(900000)
+  var activityIdGEN = new AtomicInteger(800000)
 
   def main(args: Array[String]) {
 

@@ -7,7 +7,9 @@ import Nodes.Album
 /**
   * Created by sunito on 12/10/15.
   */
-trait AlbumDB {
+object AlbumDB {
 
   var albumMap : ConcurrentHashMap[Int, Album] = new ConcurrentHashMap()
+
+  var picMap : ConcurrentHashMap[Int, String] = new ConcurrentHashMap()
 }

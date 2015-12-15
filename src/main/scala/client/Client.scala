@@ -1,6 +1,7 @@
 package client
 
 import java.security.PublicKey
+import java.util.concurrent.atomic.AtomicInteger
 
 import akka.actor.{Props, ActorSystem}
 import security.DigitalSignature
@@ -14,8 +15,12 @@ object Client extends App with DigitalSignature{
   var serverIP : String = "localhost"
   var serverPort : Int = 8080
 
-  val totalUsers : Int = 6
+  val totalUsers : Int = 600
   val runTime : Int = 300 // in seconds
+
+  var picIdGEN = new AtomicInteger(500000)
+  var postIdGEN = new AtomicInteger(600000)
+
 
   val system = ActorSystem("SecureFacebookClient")
 
@@ -32,11 +37,19 @@ object Client extends App with DigitalSignature{
 
   //simulator ! GetUserBasicDetails
 
-  simulator ! AddFriends
+ // simulator ! AddFriends
 
-  simulator ! AddPages
+ // simulator ! AddPages
 
-  def verifyServer(msg : String, serverPubKey : PublicKey) = {
-    verify(msg, serverPubKey)
+ // simulator ! AddAlbums
+
+  //simulator ! AddPicsInUserProfile
+
+  println("Finished Simulation")
+
+
+  def uuid = {
+    java.util.UUID.randomUUID.toString
   }
+
 }

@@ -6,6 +6,8 @@ case object LoginUsers
 case object GetUserBasicDetails
 case object AddFriends
 case object AddPages
+case object AddAlbums
+case object AddPicsInUserProfile
 
 /**
   * Created by sunito on 12/11/15.
@@ -28,6 +30,8 @@ class Simulator( totalUsers: Int, ServerIP : String, ServerPort : Int, runTime :
     //case GetUserBasicDetails => getUserDetails
     case AddFriends => addFriends
     case AddPages => addPages
+    case AddAlbums => addAlbums
+    case AddPicsInUserProfile => addPicsInUserProfile
     case default => "default msg"
   }
 
@@ -59,6 +63,20 @@ class Simulator( totalUsers: Int, ServerIP : String, ServerPort : Int, runTime :
     var u = 0
     for (u <- 1 to totalUsers){
       workerPool(u) ! AddPage
+    }
+  }
+
+  def addAlbums = {
+    var u = 0
+    for (u <- 1 to totalUsers){
+      workerPool(u) ! AddAlbum
+    }
+  }
+
+  def addPicsInUserProfile = {
+    var u = 0
+    for (u <- 1 to totalUsers){
+      workerPool(u) ! AddPicInUserProfile
     }
   }
 

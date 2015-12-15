@@ -303,7 +303,7 @@ class Worker ( actorSys : ActorSystem) extends Actor with FirstClassData{
              var t_pic_ids : List[Int] = List()
              for (pic <- pics) {
                t_pic_ids = t_pic_ids :+ pic.id
-               picMap.put(pic.id, new Pic(pic.id, pic.album_id, pic.description, pic.data, None))
+               //picMap.put(pic.id, new Pic(pic.id, pic.album_id, pic.description, pic.data, None))
              }
              curr_pics = curr_pics ::: t_pic_ids
              albumMap.put(albumId, album.copy(pics = Some(curr_pics)))

@@ -37,7 +37,6 @@ case class AlbumDTO ( id : Int,
                       description : String)
 
 case class PicDTO ( id : Int,
-                    album_id : Int,
                     description : String,
                     data : String)
 

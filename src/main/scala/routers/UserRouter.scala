@@ -6,6 +6,7 @@ import akka.util.Timeout
 import service._
 import spray.routing.HttpServiceActor
 
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
@@ -16,7 +17,7 @@ import scala.concurrent.duration._
 
 class UserRouter extends HttpServiceActor with AuthRouter {
 
-  implicit val timeout = Timeout(500.millis)
+  implicit val timeout = Timeout(1500.millis)
   val userService = context.actorOf(Props[UserService], name = "userService")
 
   def receive = runRoute(userRoute)
@@ -54,10 +55,9 @@ class UserRouter extends HttpServiceActor with AuthRouter {
           entity(as[String]) {
             msg => {
               authenticateUser(userId, msg) {
-                complete {
-                  userService ! SaveUserBasicInfo(userId, msg.split("#sep#")(1))
-                  "Posted user basic details: " + userId
-                }
+                val f = (userService ? SaveUserBasicInfo(userId, msg.split("#sep#")(1))).mapTo[String].map(s => s"{$s}")
+                complete(f)
+                  //"Posted user basic details: " + userId
               }
             }
           }
@@ -70,22 +70,12 @@ class UserRouter extends HttpServiceActor with AuthRouter {
           entity(as[String]) {
             msg => {
               authenticateUser(userId, msg) {
-                complete {
-                  userService ! SavePageAndPageProfile(userId, msg.split("#sep#")(1))
-                  "Posted page details for:" + userId
-                }
+                val f = (userService ? SavePageAndPageProfile(userId, msg.split("#sep#")(1))).mapTo[String].map(s => s"{$s}")
+                complete (f)
+                  //"Posted page details for:" + userId
               }
             }
           }
-        }
-      }
-    }~
-    get {
-      path("pageprofile"/ IntNumber) {
-        userId => {
-          println("in router: GET PageProfile" + userId)
-          val f = (userService ? GetPageAndProfile(userId)).mapTo[String].map(s => s"${s}")
-          complete(f)
         }
       }
     }~
@@ -104,10 +94,38 @@ class UserRouter extends HttpServiceActor with AuthRouter {
           entity(as[String]) {
             msg => {
               authenticateUser(userId, msg) {
-                complete {
-                  userService ! SaveUserSharable(userId, msg.split("#sep#")(1))
-                  "Posted user basic details: " + userId
-                }
+                val f = (userService ? SaveUserSharable(userId, msg.split("#sep#")(1))).mapTo[String].map(s => s"${s}")
+                complete(f)
+              }
+            }
+          }
+        }
+      }
+    }~
+    post {
+      path("album" / "save" / IntNumber) {
+        userId => {
+          entity(as[String]) {
+            msg => {
+              authenticateUser(userId, msg) {
+                val f = (userService ? SaveUserAlbum(userId, msg.split("#sep#")(1))).mapTo[String].map(s => s"${s}")
+                complete(f)
+                  //"Posted Album on UserProfile: " + msg.split("#sep#")(1)
+              }
+            }
+          }
+        }
+      }
+    }~
+    post {
+      path("page"/ "album" / "save" / IntNumber) {
+        userId => {
+          entity(as[String]) {
+            msg => {
+              authenticateUser(userId, msg) {
+                val f = (userService ? SavePageAlbum(userId, msg.split("#sep#")(1))).mapTo[String].map(s => s"${s}")
+                complete(f)
+                  //"Posted Album on PageProfile: for user: " + userId
               }
             }
           }

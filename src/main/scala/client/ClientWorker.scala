@@ -1,12 +1,12 @@
 package client
 
-import java.security.KeyPair
+import java.security.{PublicKey, KeyFactory, KeyPair}
 
 import Nodes.{Sharable, Viewer}
 import akka.actor.Actor
 import akka.event.Logging
 import common.JsonImplicits._
-import common.{PageDTO, ProfileDTO, UserDTO}
+import common._
 import security.{AES, DigitalSignature}
 import spray.client.pipelining._
 import spray.json._
@@ -16,15 +16,15 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 case object Login
-
 case class SetUserId(uid: Int)
-
 case object AddPage
+case object AddAlbum
+case object AddPicInUserProfile
 
 /**
   * Created by sunito on 12/11/15.
   */
-class ClientWorker(baseURL: String) extends Actor with DigitalSignature with AES {
+class ClientWorker(baseURL: String) extends Actor with DigitalSignature  with AES {
 
   var keyPair: KeyPair = null
   var pubKey: String = null
@@ -44,6 +44,8 @@ class ClientWorker(baseURL: String) extends Actor with DigitalSignature with AES
     //case GetUserBasicDetails => getBasicDetails
     case AddFriends => addFriends
     case AddPage => createAndSendPageProfile
+    case AddAlbum => createAndSendAlbum
+    case AddPicInUserProfile => createAndSendPicInUserProfile
     case default => "default msg in client worker"
   }
 
@@ -77,7 +79,7 @@ class ClientWorker(baseURL: String) extends Actor with DigitalSignature with AES
 
     f onComplete {
       case Success(t)
-      => if (Client.verifyServer(t, getPublicKey(decodeBASE64(serverPubKey))))
+      => if (verifyServer(t, getPublicKey(decodeBASE64(serverPubKey))))
         clientWorkerLog.info("userId: " + uid + " has public-key: " + t)
       else
         clientWorkerLog.info("Failed to verify Server's DigitalSignature in GET user/public-key/")
@@ -145,7 +147,7 @@ class ClientWorker(baseURL: String) extends Actor with DigitalSignature with AES
     sendPublicKey
   }
 
-
+  //Sam
   def createAndSendPageProfile = {
     val pageDTO = new PageDTO(1,userId, "pagecreatedby: " + workerId)
     val pageprofileDTO = new ProfileDTO(1,1,false,"PagecreatedBy"+ userId, "test@gmail.com","PicString")
@@ -157,27 +159,18 @@ class ClientWorker(baseURL: String) extends Actor with DigitalSignature with AES
       Post(baseURL + "user/page/save/" + userId, msg)
     }
 
-   // handleGenericPostFuture(f, "in POST PageProfile")
+    handleGenericPostFuture(f, "in POST PageProfile")
 
-    f onComplete {
-      case Success(t) => getPageProfile
+    /*f onComplete {
+      case Success(t) => println("PageCreated")//getPageProfile
       case Failure(err) => clientWorkerLog.error(err.toString)
-    }
-  }
-
-
-  def getPageProfile = {
-    println("Sending GET request: getPageProfile: " + userId)
-    val f = pipeline {
-      Get(baseURL + "user/pageprofile/" + userId)
-    }
-    handleGenericGetFuture(f, "in GetPageProfile")
+    }*/
   }
 
   def handleGenericGetFuture(f: Future[String], customMsg: String) = {
     f onComplete {
       case Success(msg: String)
-      =>if (Client.verifyServer(msg, getPublicKey(decodeBASE64(serverPubKey))))
+      =>if (verifyServer(msg, getPublicKey(decodeBASE64(serverPubKey))))
         clientWorkerLog.info("Success: " + customMsg + " -> " + msg)
       else
         clientWorkerLog.error("Failed to verify Server's DigitalSignature " + customMsg)
@@ -205,7 +198,7 @@ class ClientWorker(baseURL: String) extends Actor with DigitalSignature with AES
     //handleGenericFuture(f, "in AddFriends")
     f onComplete {
       case Success(msg: String)
-      =>if (Client.verifyServer(msg, getPublicKey(decodeBASE64(serverPubKey)))) {
+      =>if (verifyServer(msg, getPublicKey(decodeBASE64(serverPubKey)))) {
           val datamsg : String = msg.split("#sep#")(1)
           val friendIds: List[Int] = datamsg.split("#sepdata#")(0).parseJson.convertTo[List[Int]]
           val friendPubKeys: List[String] = datamsg.split("#sepdata#")(1).parseJson.convertTo[List[String]]
@@ -234,6 +227,36 @@ class ClientWorker(baseURL: String) extends Actor with DigitalSignature with AES
       Post(baseURL + "user/sharable/save/" + userId, msg)
     }
     handleGenericPostFuture(f, "in AddSharable: " + userId)
+  }
+
+  def createAndSendAlbum = {
+
+    val albumDTO : AlbumDTO = new AlbumDTO(1, 1, "albumname: " + userId, "description-yada")
+    val data = albumDTO.toJson.toString()
+    val msg: String = sign(data, keyPair.getPrivate)
+    clientWorkerLog.info("Sending POST request: AddAlbum: " + userId)
+    val f = pipeline {
+      Post(baseURL + "user/album/save/" + userId, msg)
+    }
+    handleGenericPostFuture(f, "in AddAlbum: " + userId)
+  }
+
+  def createAndSendPicInUserProfile = {
+    val picId : Int = Client.picIdGEN.addAndGet(1)
+    val picDTO : PicDTO = new PicDTO(picId, "pic-description: " + picId, "pic-clear-data")
+    val iVector : String = Client.uuid
+    val encPic : String = encodeBASE64(encryptAES(getAESSecretKey(aesKey), picDTO.toJson.toString(), iVector))
+    val data = encPic
+    val msg: String = sign(data, keyPair.getPrivate)
+    clientWorkerLog.info("Sending POST request: AddPicInUserProifle: " + userId)
+    val f = pipeline {
+      Post(baseURL + "profile/user/album/pic/save/" + userId + "/" + picId, msg) //Ideally we need to pass albumId
+    }
+    handleGenericPostFuture(f, "in AddPicInUserAlbum: " + userId)
+  }
+
+  def verifyServer(msg : String, serverPubKey : PublicKey) = {
+    verify(msg, serverPubKey)
   }
 
 }

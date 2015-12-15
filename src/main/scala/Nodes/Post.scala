@@ -28,3 +28,5 @@ case class Post (id : Int,
   }
 
 }
+
+case class SharablePost (postId : Int, sharableId : Int, ivector : String, post: Post)

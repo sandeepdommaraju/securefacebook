@@ -2,12 +2,12 @@ package Data
 
 import java.util.concurrent.ConcurrentHashMap
 
-import Nodes.Post
+import Nodes.{SharablePost, Post}
 
 /**
   * Created by sunito on 12/10/15.
   */
-trait PostDB {
+object PostDB {
 
-  var postMap : ConcurrentHashMap[Int, Post] = new ConcurrentHashMap()
+  var postMap : ConcurrentHashMap[Int, SharablePost] = new ConcurrentHashMap()
 }

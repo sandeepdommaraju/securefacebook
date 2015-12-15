@@ -789,7 +789,7 @@ object RESTClient extends App {
 
         println("saving userAlbumPic: " + picObj)
 
-        val albumId = picObj.album_id
+        val albumId = 300//picObj.album_id
         val userId = albumId - 521000
         val profileId = albumId - 411000
 
