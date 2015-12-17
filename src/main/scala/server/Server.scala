@@ -19,8 +19,8 @@ object Server extends  SimpleRoutingApp with DigitalSignature{
 
   implicit val system = ActorSystem("SecureFacebookServer")
 
-  val userRouter = system.actorOf(Props[UserRouter].withRouter(RoundRobinPool(10)))
-  val profileRouter = system.actorOf(Props[ProfileRouter].withRouter(RoundRobinPool(10)))
+  val userRouter = system.actorOf(Props(new UserRouter).withRouter(RoundRobinPool(10)))
+  val profileRouter = system.actorOf(Props(new ProfileRouter).withRouter(RoundRobinPool(10)))
   /*val pageRouter = system.actorOf(Props[PageRouter].withRouter(RoundRobinPool(5)))
   val friendRouter = system.actorOf(Props[FriendRouter].withRouter(RoundRobinPool(5)))
   val postRouter = system.actorOf(Props[PostRouter].withRouter(RoundRobinPool(5)))

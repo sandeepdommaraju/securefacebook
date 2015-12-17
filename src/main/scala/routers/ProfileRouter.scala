@@ -25,7 +25,7 @@ class ProfileRouter extends AuthRouter {
     get {
       path("user" / IntNumber) {
         userId => {
-          val f = (profileService ? GetProfile(userId)).mapTo[String].map(s => s"${s}")
+          val f = (profileService ? GetProfile(userId)).mapTo[String].map(s => s"$s")
           complete(f)
         }
       }
@@ -36,7 +36,7 @@ class ProfileRouter extends AuthRouter {
               entity(as[String]) {
                 msg =>
                   authenticateUser(userId, msg) {
-                    val f = (profileService ? SaveUserProfile(userId, msg.split("#sep#")(1))).mapTo[String].map(s => s"${s}")
+                    val f = (profileService ? SaveUserProfile(userId, msg.split("#sep#")(1))).mapTo[String].map(s => s"$s")
                     complete(f)
                       //"Saved UserProfile: " + userId
                   }
@@ -50,7 +50,7 @@ class ProfileRouter extends AuthRouter {
             entity(as[String]) {
               msg =>
                 authenticateUser(userId, msg) {
-                  val f = (profileService ? SavePicInUserProfileAlbum(userId, picId, msg.split("#sep#")(1))).mapTo[String].map(s => s"${s}")
+                  val f = (profileService ? SavePicInUserProfileAlbum(userId, picId, msg.split("#sep#")(1))).mapTo[String].map(s => s"$s")
                   complete(f)
                     //"Saved PicInUserProfileAlbum: " + userId
                 }

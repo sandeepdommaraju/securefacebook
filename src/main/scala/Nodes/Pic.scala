@@ -17,3 +17,5 @@ case class Pic ( id : Int,
 }
 
 case class SharablePic (picId : Int, sharableId : Int, ivector : String, encPic: String)
+
+case class FriendSharablePic(friendId : Int, sharablePic : SharablePic, encAES : String)

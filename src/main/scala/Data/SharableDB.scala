@@ -9,6 +9,6 @@ import Nodes.{Sharable, Viewer}
   */
 object SharableDB {
 
-  var sharable_Viewers_Map : ConcurrentHashMap[Int, Sharable]
-   = new ConcurrentHashMap()
+  //var sharable_Viewers_Map : ConcurrentHashMap[Int, Sharable]
+   //= new ConcurrentHashMap()
 }

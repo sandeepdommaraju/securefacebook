@@ -39,7 +39,7 @@ class Simulator( totalUsers: Int, ServerIP : String, ServerPort : Int, runTime :
     var u = 0
 
     for (u <- 1 to totalUsers) {
-      println("logging in actor: " + u)
+      //println("logging in actor: " + u)
       (workerPool(u) ! Login)
     }
   }

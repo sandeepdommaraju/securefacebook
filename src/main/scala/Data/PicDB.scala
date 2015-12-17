@@ -9,5 +9,5 @@ import Nodes.{SharablePic, Pic}
   */
 object PicDB {
 
-  val picMap : ConcurrentHashMap[Int, SharablePic] = new ConcurrentHashMap()
+  val picMap : ConcurrentHashMap[Int, SharablePic] = new ConcurrentHashMap() //picId vs SharablePic
 }

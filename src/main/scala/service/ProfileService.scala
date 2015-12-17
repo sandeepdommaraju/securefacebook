@@ -18,21 +18,21 @@ import Data.AlbumDB._
 
 case class SaveUserProfile(userId: Int, data: String)
 case class GetProfile(userId: Int)
-case class SavePicInUserProfileAlbum(userId: Int, picId: Int, data: String)
+
 
 class ProfileService extends Actor with DigitalSignature {
 
   val profileServiceLog = Logging(context.system, this)
 
   def receive = {
-    case SaveUserProfile(userId, data)
+    /*case SaveUserProfile(userId, data)
     => val p: ProfileDTO = data.parseJson.convertTo[ProfileDTO]
       val newProfileId: Int = Server.profileIdGEN.addAndGet(1)
       val user : User = userMap.get(userId)
       //println(user)
       userMap.put(userId, user.copy(u_profile_id = Some(newProfileId)))
       profileMap.put(p.userOrPageId, new Profile(newProfileId, p.userOrPageId, p.userOrPage, p.description, p.email, p.pic, null))
-      profileServiceLog.info("SavedUserProfile: " + p.userOrPageId)
+      //profileServiceLog.info("SavedUserProfile: " + p.userOrPageId)
       sender ! "Saved UserProfile: " + userId
 
     case GetProfile(userId)
@@ -50,6 +50,7 @@ class ProfileService extends Actor with DigitalSignature {
       picMap.put(picId, data)
       profileServiceLog.info("SavedPicInUserProfileAlbum: userId:" + userId + " picId: " + picId)
       sender ! "Saved PicInUserProfileAlbum: " + userId
+      */
 
     case default => "default"
   }

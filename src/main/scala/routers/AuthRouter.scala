@@ -7,7 +7,7 @@ import spray.routing.{Directive0, HttpServiceActor}
 /**
   * Created by sunito on 12/12/15.
   */
-trait AuthRouter extends HttpServiceActor  with DigitalSignature{
+trait AuthRouter extends HttpServiceActor with DigitalSignature{
 
   def authenticateUser( userId : Int, msg : String) : Directive0 = {
       val userPublicKey= pubKeyMap.get(userId)

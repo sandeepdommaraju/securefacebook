@@ -13,9 +13,9 @@ trait AES extends coders{
   val ALGORITHM = "AES/CBC/PKCS5Padding"
   val CHARSET = "UTF-8"
 
-  def encryptAES(key: SecretKey, plainText: String, ivector : String): Array[Byte] = {
+  def encryptAES(key: SecretKey, plainText: String, iVector : String): Array[Byte] = {
     //Instantiate the cipher
-    val x = ivector.getBytes("UTF-8")
+    val x = iVector.getBytes("UTF-8")
     val iv:IvParameterSpec = new IvParameterSpec(util.Arrays.copyOfRange(x, 0, 16))
     val cipher = Cipher.getInstance(ALGORITHM)
     cipher.init(Cipher.ENCRYPT_MODE, key, iv)
@@ -23,15 +23,16 @@ trait AES extends coders{
     encryptedTextBytes
   }
 
-  def decryptAES(encryptedText: Array[Byte], key: SecretKey, ivector:String): String = {
+  def decryptAES(encryptedText: Array[Byte], key: SecretKey, iVector:String): String = {
     //Instantiate the cipher
-    val x = ivector.getBytes("UTF-8")
+    val x = iVector.getBytes("UTF-8")
     val iv:IvParameterSpec = new IvParameterSpec(util.Arrays.copyOfRange(x, 0, 16))
     val cipher = Cipher.getInstance(ALGORITHM)
     cipher.init(Cipher.DECRYPT_MODE, key, iv)
 
     val decryptedTextBytes = cipher.doFinal(encryptedText)
-    new String(decryptedTextBytes)
+    //new String(decryptedTextBytes)
+    encodeBASE64(decryptedTextBytes)
   }
 
   def generateAESKey: SecretKey = {
@@ -49,13 +50,13 @@ trait AES extends coders{
 
 
   def main(args: Array[String]) {
-    val plainText = "Hello World1213221"
+    val plainText = "foo-bar-foo-foo-bar-bar"
     val key = generateAESKey
-    val ivector = "foo"
+    val iVector = "foo"
 
     println("alice: " + plainText)
-    val enc = encryptAES(key, plainText, ivector)
-    val text = decryptAES(enc, key, ivector)
+    val enc = encryptAES(key, plainText, iVector)
+    val text = decryptAES(enc, key, iVector)
     println("bob: " + text)
 
     val aesStr = encodeBASE64(key.getEncoded)

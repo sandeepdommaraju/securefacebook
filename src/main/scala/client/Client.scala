@@ -10,12 +10,12 @@ import service.GetUserBasicInfo
 /**
   * Created by sunito on 12/11/15.
   */
-object Client extends App with DigitalSignature{
+object Client extends App {
 
   var serverIP : String = "localhost"
   var serverPort : Int = 8080
 
-  val totalUsers : Int = 600
+  val totalUsers : Int = 10
   val runTime : Int = 300 // in seconds
 
   var picIdGEN = new AtomicInteger(500000)
@@ -26,24 +26,23 @@ object Client extends App with DigitalSignature{
 
   val simulator = system.actorOf(Props(new Simulator(totalUsers, serverIP, serverPort, runTime)), name="SimulatorActor")
 
-  simulator ! LoginUsers
-
-  //simulator ! CreateBasicProfiles
+  simulator ! LoginUsers // send user public key, get server public key, add user basic info, send user profile, send page profile, get page profile
 
   var startTime = System.currentTimeMillis()
   while(System.currentTimeMillis() < startTime + 10*1000){
 
   }
 
-  //simulator ! GetUserBasicDetails
+  simulator ! AddFriends //add friends, add sharable, get sharable
 
- // simulator ! AddFriends
+  startTime = System.currentTimeMillis()
+  while(System.currentTimeMillis() < startTime + 10*1000){
 
- // simulator ! AddPages
+  }
 
- // simulator ! AddAlbums
+  simulator ! AddAlbums //add album in user profile, get album
 
-  //simulator ! AddPicsInUserProfile
+  simulator ! AddPicsInUserProfile //add pic in user-profile-album
 
   println("Finished Simulation")
 

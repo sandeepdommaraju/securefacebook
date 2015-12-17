@@ -1,6 +1,6 @@
 package common
 
-import java.security.PublicKey
+import java.security.{MessageDigest, PublicKey}
 import java.util.concurrent.atomic.AtomicInteger
 
 import Nodes._
@@ -15,6 +15,10 @@ class Util {
   var IDGen : AtomicInteger = new AtomicInteger()
 
 }
+
+/*object shaObj {
+  val sha: MessageDigest = MessageDigest.getInstance("SHA-256")
+}*/
 
 object JsonImplicits extends DefaultJsonProtocol with SprayJsonSupport{
 
@@ -47,5 +51,9 @@ object JsonImplicits extends DefaultJsonProtocol with SprayJsonSupport{
   implicit val viewerFormat = jsonFormat2(Viewer)
 
   implicit val sharableFormat = jsonFormat2(Sharable)
+
+  implicit val sharablePicFormat = jsonFormat4(SharablePic)
+
+  implicit val friendSharablePicFormat = jsonFormat3(FriendSharablePic)
 
 }

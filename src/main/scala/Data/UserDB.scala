@@ -16,7 +16,7 @@ object UserDB {
 
   var aesKeyMap : ConcurrentHashMap[Int, String] = new ConcurrentHashMap() //user AES keys encrypted with RSA user-public keys
 
-  var userSharableMap : ConcurrentHashMap[Int, List[Int]] = new ConcurrentHashMap()
+  var userSharableMap : ConcurrentHashMap[Int, List[Int]] = new ConcurrentHashMap() //userId vs List[SharableId]
 
   var sharableMap : ConcurrentHashMap[Int, Sharable] = new ConcurrentHashMap()
 
